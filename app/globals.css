@@ -262,12 +262,12 @@ body {
 .view-header {
   display: flex;
   flex-wrap: wrap;
-  align-items: end;
+  align-items: center;
   justify-content: space-between;
   column-gap: 12px;
-  row-gap: 14px;
-  padding: 18px 0 22px;
-  margin-bottom: 28px;
+  row-gap: 12px;
+  padding: 16px 0 20px;
+  margin-bottom: 24px;
   border-bottom: 1px solid var(--text-line);
   position: relative;
   min-width: 0;
@@ -276,37 +276,54 @@ body {
 .view-header-main {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   min-width: 0;
   flex: 1 1 auto;
 }
-.view-header-titles { min-width: 0; flex: 1 1 auto; }
-.view-header--with-back { row-gap: 14px; }
+.view-header-titles {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.view-header--with-back { row-gap: 12px; }
 .view-folio {
   font-family: var(--font-poppins), 'Poppins', sans-serif;
-  font-size: 0.7rem;
-  letter-spacing: 0.18em;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
   color: var(--text-mute);
   text-transform: uppercase;
   text-align: right;
   line-height: 1.4;
-  padding-bottom: 4px;
+  padding-bottom: 0;
   white-space: normal;
   overflow-wrap: anywhere;
   flex: 0 1 auto;
   max-width: 100%;
+  align-self: end;
 }
 .view-folio b { color: var(--accent); font-weight: 500; }
 
+/* Tablet: más aire entre bloque y folio */
+@media (min-width: 481px) {
+  .view-header {
+    padding: 20px 0 24px;
+    margin-bottom: 28px;
+    column-gap: 16px;
+  }
+}
+
+/* Móvil pequeño: el folio baja a su propia línea */
 @media (max-width: 380px) {
   .view-folio {
     text-align: left;
-    padding-bottom: 0;
+    align-self: auto;
     flex-basis: 100%;
     border-top: 1px dashed var(--text-line);
-    padding-top: 4px;
+    padding-top: 8px;
+    padding-bottom: 0;
   }
-  .view-title { font-size: 1.55rem; }
 }
 .view-header::after {
   content: "";
@@ -317,30 +334,33 @@ body {
 }
 .view-eyebrow {
   font-family: var(--font-poppins), 'Poppins', sans-serif;
-  font-size: 0.65rem;
-  letter-spacing: 0.35em;
+  font-size: clamp(0.58rem, 0.55rem + 0.2vw, 0.7rem);
+  letter-spacing: 0.32em;
   color: var(--accent);
   text-transform: uppercase;
-  margin: 0 0 6px;
+  margin: 0;
   display: flex;
   align-items: center;
   gap: 8px;
+  overflow-wrap: anywhere;
 }
 .view-eyebrow::before {
   content: "";
-  width: 18px;
+  width: 16px;
   height: 1px;
   background: var(--accent);
   display: inline-block;
+  flex-shrink: 0;
 }
 .view-title {
   font-family: var(--font-poppins), 'Poppins', sans-serif;
-  font-size: 1.85rem;
+  font-size: clamp(1.45rem, 1.15rem + 1.6vw, 2.1rem);
   font-weight: 700;
   margin: 0;
   letter-spacing: -0.02em;
-  line-height: 1;
+  line-height: 1.05;
   color: var(--paper);
+  overflow-wrap: anywhere;
 }
 
 .icon-btn {
@@ -354,10 +374,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   transition: transform 0.15s var(--t), background 0.2s, border-color 0.2s;
 }
 .icon-btn:hover  { background: var(--ink-3); border-color: var(--accent-line); }
 .icon-btn:active { transform: scale(0.92); }
+.icon-btn svg { width: 18px; height: 18px; }
 
 /* ====================================================
    REGLAS NUMERADAS (signature element)
