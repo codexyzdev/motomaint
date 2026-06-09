@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useId } from 'react';
 import { useRouter } from 'next/navigation';
 import { data } from '@/lib/data';
 import { computeServicesStatus } from '@/lib/engine';
@@ -8,9 +8,12 @@ import type { Moto, Registro, ServicioCalculado, TipoServicio } from '@/lib/type
 import { useToast } from '@/components/ui/useToast';
 import Modal from '@/components/ui/Modal';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import EditMotoModal from '@/components/ui/EditMotoModal';
 import MotoCard from './MotoCard';
 import ServiceTabs from './ServiceTabs';
 import FAB from './FAB';
+
+const MAX_NOTES_LENGTH = 500;
 
 type ModalState =
   | { type: 'none' }
@@ -31,8 +34,6 @@ export default function DashboardView() {
   const [activeTab, setActiveTab] = useState<'services' | 'history'>('services');
   const [modalState, setModalState] = useState<ModalState>({ type: 'none' });
 
-  const [editMotoMarca, setEditMotoMarca] = useState('');
-  const [editMotoModelo, setEditMotoModelo] = useState('');
   const [editKmValue, setEditKmValue] = useState('');
   const [recordKm, setRecordKm] = useState('');
   const [recordNotes, setRecordNotes] = useState('');
@@ -57,8 +58,6 @@ export default function DashboardView() {
 
   function openEditMoto() {
     if (!moto) return;
-    setEditMotoMarca(moto.marca);
-    setEditMotoModelo(moto.modelo);
     setModalState({ type: 'editMoto', moto });
   }
 
@@ -68,24 +67,10 @@ export default function DashboardView() {
     setModalState({ type: 'editKm', currentKm: moto.kmActual });
   }
 
-  async function handleSaveMoto() {
-    const marca = editMotoMarca.trim();
-    const modelo = editMotoModelo.trim();
-    if (!marca || !modelo) {
-      showToast('Marca y modelo son requeridos', 'danger');
-      return;
-    }
-    await data.saveMoto({ marca, modelo });
-    await refresh();
-    setModalState({ type: 'none' });
-    showToast('Moto actualizada', 'success');
-  }
-
   async function handleSaveKm() {
     const km = parseInt(editKmValue) || 0;
     await data.updateKm(Math.max(0, km));
     await refresh();
-    setModalState({ type: 'none' });
     showToast('Kilometraje actualizado', 'success');
   }
 
@@ -119,7 +104,6 @@ export default function DashboardView() {
     }
 
     await refresh();
-    setModalState({ type: 'none' });
     showToast(`${recordModal.service.name} registrado`, 'success');
   }
 
@@ -145,7 +129,6 @@ export default function DashboardView() {
     if (recordModal.type !== 'confirmDeleteRecord') return;
     await data.removeRecord(recordModal.record.id);
     await refresh();
-    setModalState({ type: 'none' });
     showToast('Registro eliminado', 'success');
   }
 
@@ -211,37 +194,13 @@ export default function DashboardView() {
       <FAB onClick={handleOpenServicePicker} />
 
       {modalState.type === 'editMoto' && (
-        <Modal
-          title="Editar moto"
+        <EditMotoModal
+          moto={modalState.moto}
           onClose={closeModal}
-          actions={[
-            { label: 'Cancelar', variant: 'btn-ghost', onClick: closeModal },
-            { label: 'Guardar', variant: 'btn-primary', onClick: handleSaveMoto },
-          ]}
-        >
-          <div className="form-group">
-            <label htmlFor="edit-marca">Marca</label>
-            <input
-              id="edit-marca"
-              type="text"
-              className="input"
-              value={editMotoMarca}
-              onChange={(e) => setEditMotoMarca(e.target.value)}
-              maxLength={50}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="edit-modelo">Modelo</label>
-            <input
-              id="edit-modelo"
-              type="text"
-              className="input"
-              value={editMotoModelo}
-              onChange={(e) => setEditMotoModelo(e.target.value)}
-              maxLength={50}
-            />
-          </div>
-        </Modal>
+          onSaved={async () => {
+            await refresh();
+          }}
+        />
       )}
 
       {modalState.type === 'editKm' && (
@@ -258,6 +217,7 @@ export default function DashboardView() {
             <input
               id="edit-km"
               type="number"
+              inputMode="numeric"
               className="input"
               value={editKmValue}
               onChange={(e) => setEditKmValue(e.target.value)}
@@ -280,7 +240,7 @@ export default function DashboardView() {
                 className="service-picker-item"
                 onClick={() => handleServiceSelect(service)}
               >
-                <span className="service-picker-icon">{service.icon}</span>
+                <span className="service-picker-icon" aria-hidden="true">{service.icon}</span>
                 <span className="service-picker-name">{service.name}</span>
               </button>
             ))}
@@ -289,68 +249,20 @@ export default function DashboardView() {
       )}
 
       {modalState.type === 'recordService' && (
-        <Modal
-          title={`Registrar ${modalState.service.name}`}
+        <RecordServiceModal
+          service={modalState.service}
+          defaultKm={modalState.defaultKm}
+          recordKm={recordKm}
+          setRecordKm={setRecordKm}
+          recordNotes={recordNotes}
+          setRecordNotes={setRecordNotes}
+          onSave={handleSaveRecord}
           onClose={closeModal}
-          actions={[
-            { label: 'Cancelar', variant: 'btn-ghost', onClick: closeModal },
-            { label: 'Guardar', variant: 'btn-primary', onClick: handleSaveRecord },
-          ]}
-        >
-          <div className="form-group">
-            <label htmlFor="record-km">Kilómetros</label>
-            <input
-              id="record-km"
-              type="number"
-              className="input"
-              value={recordKm}
-              onChange={(e) => setRecordKm(e.target.value)}
-              min={0}
-              max={999999}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="record-notes">Notas (opcional)</label>
-            <textarea
-              id="record-notes"
-              className="input"
-              value={recordNotes}
-              onChange={(e) => setRecordNotes(e.target.value)}
-              rows={3}
-            />
-          </div>
-        </Modal>
+        />
       )}
 
       {modalState.type === 'serviceDetail' && (
-        <Modal
-          title={modalState.service.name}
-          subtitle={modalState.service.icon}
-          onClose={closeModal}
-          actions={[
-            { label: 'Cerrar', variant: 'btn-primary', onClick: closeModal },
-          ]}
-        >
-          <div className="service-detail-info">
-            <div className={`service-status ${modalState.service.status}`}>
-              {modalState.service.status === 'urgent' && '⚠️ Vencido'}
-              {modalState.service.status === 'warning' && '⏰ Por vencer'}
-              {modalState.service.status === 'ok' && '✅ OK'}
-            </div>
-            {modalState.service.kmRemaining !== null && (
-              <p>Kilómetros restantes: {modalState.service.kmRemaining} km</p>
-            )}
-            {modalState.service.daysRemaining !== null && (
-              <p>Días restantes: {modalState.service.daysRemaining}</p>
-            )}
-            {modalState.service.lastRecord && (
-              <p>
-                Último servicio: {modalState.service.lastRecord.km} km —{' '}
-                {new Date(modalState.service.lastRecord.date).toLocaleDateString('es-CO')}
-              </p>
-            )}
-          </div>
-        </Modal>
+        <ServiceDetailModal service={modalState.service} onClose={closeModal} />
       )}
 
       {modalState.type === 'confirmDeleteRecord' && (
@@ -365,5 +277,118 @@ export default function DashboardView() {
         />
       )}
     </div>
+  );
+}
+
+interface RecordServiceModalProps {
+  service: TipoServicio;
+  defaultKm: number;
+  recordKm: string;
+  setRecordKm: (v: string) => void;
+  recordNotes: string;
+  setRecordNotes: (v: string) => void;
+  onSave: () => Promise<void> | void;
+  onClose: () => void;
+}
+
+function RecordServiceModal({
+  service,
+  defaultKm,
+  recordKm,
+  setRecordKm,
+  recordNotes,
+  setRecordNotes,
+  onSave,
+  onClose,
+}: RecordServiceModalProps) {
+  const { showToast } = useToast();
+  const idPrefix = useId();
+
+  const handleSave = async () => {
+    const km = parseInt(recordKm) || 0;
+    if (km < 0) {
+      showToast('El kilometraje no puede ser negativo', 'danger');
+      return;
+    }
+    await onSave();
+  };
+
+  return (
+    <Modal
+      title={`Registrar ${service.name}`}
+      subtitle={`Último servicio: ${defaultKm.toLocaleString('es-CO')} km`}
+      onClose={onClose}
+      actions={[
+        { label: 'Cancelar', variant: 'btn-ghost', onClick: onClose },
+        { label: 'Guardar', variant: 'btn-primary', onClick: handleSave },
+      ]}
+    >
+      <div className="form-group">
+        <label htmlFor={`${idPrefix}-km`}>Kilómetros</label>
+        <input
+          id={`${idPrefix}-km`}
+          type="number"
+          inputMode="numeric"
+          className="input"
+          value={recordKm}
+          onChange={(e) => setRecordKm(e.target.value)}
+          min={0}
+          max={999999}
+        />
+      </div>
+      <div className="form-group">
+        <label htmlFor={`${idPrefix}-notes`}>Notas (opcional)</label>
+        <textarea
+          id={`${idPrefix}-notes`}
+          className="input"
+          value={recordNotes}
+          onChange={(e) => setRecordNotes(e.target.value)}
+          rows={3}
+          maxLength={MAX_NOTES_LENGTH}
+        />
+        <span className="input-counter" aria-live="polite">
+          {recordNotes.length}/{MAX_NOTES_LENGTH}
+        </span>
+      </div>
+    </Modal>
+  );
+}
+
+function ServiceDetailModal({ service, onClose }: { service: ServicioCalculado; onClose: () => void }) {
+  const statusText = {
+    urgent: 'Vencido',
+    warning: 'Por vencer',
+    ok: 'OK',
+  }[service.status];
+
+  return (
+    <Modal
+      title={service.name}
+      subtitle={statusText}
+      onClose={onClose}
+      actions={[
+        { label: 'Cerrar', variant: 'btn-primary', onClick: onClose },
+      ]}
+    >
+      <div className="service-detail-info">
+        <div className={`service-status ${service.status}`} aria-hidden="true">
+          {service.status === 'urgent' && '⚠️'}
+          {service.status === 'warning' && '⏰'}
+          {service.status === 'ok' && '✅'}
+        </div>
+        {service.kmRemaining !== null && (
+          <p>Kilómetros restantes: {service.kmRemaining} km</p>
+        )}
+        {service.daysRemaining !== null && (
+          <p>Días restantes: {service.daysRemaining}</p>
+        )}
+        {service.lastRecord && (
+          <p>
+            Último servicio: {service.lastRecord.km} km —{' '}
+            {new Date(service.lastRecord.date).toLocaleDateString('es-CO')}
+          </p>
+        )}
+      </div>
+    </Modal>
   );
 }

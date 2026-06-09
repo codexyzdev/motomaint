@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Modal from './Modal';
 
 interface ConfirmDialogProps {
@@ -8,8 +9,9 @@ interface ConfirmDialogProps {
   confirmLabel?: string;
   cancelLabel?: string;
   danger?: boolean;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void | boolean>;
   onCancel: () => void;
+  loading?: boolean;
 }
 
 export default function ConfirmDialog({
@@ -20,10 +22,27 @@ export default function ConfirmDialog({
   danger = false,
   onConfirm,
   onCancel,
+  loading = false,
 }: ConfirmDialogProps) {
+  const [internalLoading, setInternalLoading] = useState(false);
+  const isLoading = loading || internalLoading;
+
+  const handleConfirm = async () => {
+    if (isLoading) return;
+    setInternalLoading(true);
+    try {
+      const result = await onConfirm();
+      if (result === false) return;
+      onCancel();
+    } finally {
+      setInternalLoading(false);
+    }
+  };
+
   return (
     <Modal
       title={title}
+      subtitle={message}
       onClose={onCancel}
       actions={[
         {
@@ -32,13 +51,11 @@ export default function ConfirmDialog({
           onClick: onCancel,
         },
         {
-          label: confirmLabel,
+          label: isLoading ? '...' : confirmLabel,
           variant: danger ? 'btn-danger' : 'btn-primary',
-          onClick: onConfirm,
+          onClick: handleConfirm,
         },
       ]}
-    >
-      <p>{message}</p>
-    </Modal>
+    />
   );
 }

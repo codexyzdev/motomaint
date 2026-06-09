@@ -14,5 +14,14 @@ export default function Toast() {
     .filter(Boolean)
     .join(' ');
 
-  return <div className={className}>{toast.message}</div>;
+  return (
+    <div
+      className={className}
+      role={toast.type === 'danger' ? 'alert' : 'status'}
+      aria-live={toast.type === 'danger' ? 'assertive' : 'polite'}
+      aria-atomic="true"
+    >
+      {toast.message}
+    </div>
+  );
 }

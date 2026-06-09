@@ -7,14 +7,19 @@ import type { Moto, TipoServicio } from '@/lib/types';
 import { useToast } from '@/components/ui/useToast';
 import Modal from '@/components/ui/Modal';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import EditMotoModal from '@/components/ui/EditMotoModal';
 import ServiceTypeRow from './ServiceTypeRow';
 import IconPicker from './IconPicker';
+
+const DEFAULT_SERVICE_ICON = '🔧';
 
 type ModalState =
   | { type: 'none' }
   | { type: 'editMoto'; moto: Moto }
   | { type: 'editService'; service?: TipoServicio }
-  | { type: 'confirmReset' };
+  | { type: 'confirmReset' }
+  | { type: 'resetIntent' }
+  | { type: 'resetFinal' };
 
 export default function SettingsView() {
   const router = useRouter();
@@ -25,10 +30,8 @@ export default function SettingsView() {
   const [services, setServices] = useState<TipoServicio[]>([]);
   const [modalState, setModalState] = useState<ModalState>({ type: 'none' });
 
-  const [editMotoMarca, setEditMotoMarca] = useState('');
-  const [editMotoModelo, setEditMotoModelo] = useState('');
   const [editServiceName, setEditServiceName] = useState('');
-  const [editServiceIcon, setEditServiceIcon] = useState('🔧');
+  const [editServiceIcon, setEditServiceIcon] = useState(DEFAULT_SERVICE_ICON);
   const [editServiceIntervalKm, setEditServiceIntervalKm] = useState('');
   const [editServiceIntervalDays, setEditServiceIntervalDays] = useState('');
   const [editServiceEnabled, setEditServiceEnabled] = useState(true);
@@ -48,27 +51,12 @@ export default function SettingsView() {
 
   function openEditMoto() {
     if (!moto) return;
-    setEditMotoMarca(moto.marca);
-    setEditMotoModelo(moto.modelo);
     setModalState({ type: 'editMoto', moto });
-  }
-
-  async function handleSaveMoto() {
-    const marca = editMotoMarca.trim();
-    const modelo = editMotoModelo.trim();
-    if (!marca || !modelo) {
-      showToast('Marca y modelo son requeridos', 'danger');
-      return;
-    }
-    await data.saveMoto({ marca, modelo });
-    await refresh();
-    setModalState({ type: 'none' });
-    showToast('Moto actualizada', 'success');
   }
 
   function openAddService() {
     setEditServiceName('');
-    setEditServiceIcon('🔧');
+    setEditServiceIcon(DEFAULT_SERVICE_ICON);
     setEditServiceIntervalKm('');
     setEditServiceIntervalDays('');
     setEditServiceEnabled(true);
@@ -88,7 +76,7 @@ export default function SettingsView() {
     const name = editServiceName.trim();
     if (!name) {
       showToast('El nombre es requerido', 'danger');
-      return;
+      return false;
     }
 
     const intervalKm = editServiceIntervalKm ? parseInt(editServiceIntervalKm) : null;
@@ -105,14 +93,13 @@ export default function SettingsView() {
     const currentModal = modalState;
     if (currentModal.type === 'editService' && currentModal.service) {
       await data.updateService(currentModal.service.id, serviceData);
- showToast('Servicio actualizado', 'success');
+      showToast('Servicio actualizado', 'success');
     } else {
       await data.addService(serviceData);
       showToast('Servicio agregado', 'success');
     }
 
     await refresh();
-    setModalState({ type: 'none' });
   }
 
   async function handleToggleService() {
@@ -179,7 +166,7 @@ export default function SettingsView() {
   }
 
   function openConfirmReset() {
-    setModalState({ type: 'confirmReset' });
+    setModalState({ type: 'resetIntent' });
   }
 
   async function handleConfirmReset() {
@@ -289,37 +276,13 @@ export default function SettingsView() {
       </div>
 
       {modalState.type === 'editMoto' && (
-        <Modal
-          title="Editar moto"
+        <EditMotoModal
+          moto={modalState.moto}
           onClose={closeModal}
-          actions={[
-            { label: 'Cancelar', variant: 'btn-ghost', onClick: closeModal },
-            { label: 'Guardar', variant: 'btn-primary', onClick: handleSaveMoto },
-          ]}
-        >
-          <div className="form-group">
-            <label htmlFor="edit-marca">Marca</label>
-            <input
-              id="edit-marca"
-              type="text"
-              className="input"
-              value={editMotoMarca}
-              onChange={(e) => setEditMotoMarca(e.target.value)}
-              maxLength={50}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="edit-modelo">Modelo</label>
-            <input
-              id="edit-modelo"
-              type="text"
-              className="input"
-              value={editMotoModelo}
-              onChange={(e) => setEditMotoModelo(e.target.value)}
-              maxLength={50}
-            />
-          </div>
-        </Modal>
+          onSaved={async () => {
+            await refresh();
+          }}
+        />
       )}
 
       {modalState.type === 'editService' && (
@@ -354,6 +317,7 @@ export default function SettingsView() {
               <input
                 id="service-km"
                 type="number"
+                inputMode="numeric"
                 className="input"
                 value={editServiceIntervalKm}
                 onChange={(e) => setEditServiceIntervalKm(e.target.value)}
@@ -366,6 +330,7 @@ export default function SettingsView() {
               <input
                 id="service-days"
                 type="number"
+                inputMode="numeric"
                 className="input"
                 value={editServiceIntervalDays}
                 onChange={(e) => setEditServiceIntervalDays(e.target.value)}
@@ -381,6 +346,7 @@ export default function SettingsView() {
                 type="button"
                 className={`btn ${editServiceEnabled ? 'btn-secondary' : 'btn-ghost'}`}
                 onClick={() => setEditServiceEnabled(!editServiceEnabled)}
+                aria-pressed={editServiceEnabled}
               >
                 {editServiceEnabled ? 'Desactivar' : 'Activar'}
               </button>
@@ -389,11 +355,25 @@ export default function SettingsView() {
         </Modal>
       )}
 
-      {modalState.type === 'confirmReset' && (
+      {modalState.type === 'resetIntent' && (
         <ConfirmDialog
           title="Borrar todo"
-          message="Se eliminarán la moto, servicios e historial. Esta acción no se puede deshacer."
-          confirmLabel="Borrar todo"
+          message="Se eliminarán la moto, servicios e historial. Esta acción no se puede deshacer. ¿Deseas continuar?"
+          confirmLabel="Sí, continuar"
+          cancelLabel="Cancelar"
+          danger
+          onConfirm={() => {
+            setModalState({ type: 'resetFinal' });
+          }}
+          onCancel={closeModal}
+        />
+      )}
+
+      {modalState.type === 'resetFinal' && (
+        <ConfirmDialog
+          title="Última confirmación"
+          message="Esta es tu última oportunidad para cancelar. ¿Confirmas que quieres borrar todos los datos?"
+          confirmLabel="Borrar todo definitivamente"
           cancelLabel="Cancelar"
           danger
           onConfirm={handleConfirmReset}
