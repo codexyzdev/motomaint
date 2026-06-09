@@ -828,8 +828,10 @@ textarea.input {
   gap: 12px;
 }
 .service-detail-info p { margin: 0; color: var(--text-dim); font-size: 0.95rem; }
+.service-toggle { display: flex; gap: 10px; margin-top: 8px; }
 
 /* ============ SETTINGS ============ */
+.settings { min-height: 100vh; }
 .settings-section {
   margin-bottom: 28px;
 }
