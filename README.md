@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MotoMaint 🏍️
 
-## Getting Started
+> **MotoMaint** es una aplicación web *mobile-first* diseñada para gestionar y llevar el control del mantenimiento de tu motocicleta. Nunca más olvides cuándo toca hacer el próximo cambio de aceite, revisión de frenos o mantenimiento general.
 
-First, run the development server:
+![MotoMaint Screenshot](./public/icon-192.png) <!-- Reemplaza esto con un screenshot real de tu app -->
 
+## ✨ Características Principales
+
+- 📱 **Diseño Mobile-First**: Interfaz moderna, responsiva y oscura (Dark Theme) con animaciones fluidas, diseñada para sentirse como una app nativa en tu teléfono.
+- 🏍️ **Perfil de tu Moto**: Personaliza el nombre/modelo de tu motocicleta y ajusta el kilometraje actual de forma rápida.
+- 🔧 **Control de Mantenimientos**: Registra servicios y recibe notificaciones visuales sobre qué mantenimientos están por vencer o ya vencidos en base al kilometraje.
+- 🕒 **Historial de Servicios**: Mantén un registro detallado de todos los mantenimientos realizados, cuándo se hicieron y a qué kilometraje.
+- 💾 **Almacenamiento Local**: Los datos se guardan de forma segura en tu navegador (IndexedDB) para un acceso rápido y sin necesidad de conexión a internet.
+
+## 🚀 Tecnologías
+
+El proyecto está construido utilizando las últimas tecnologías web:
+
+- [Next.js 16](https://nextjs.org/) - Framework de React (App Router)
+- [React 19](https://react.dev/) - Biblioteca para interfaces de usuario
+- [Tailwind CSS v4](https://tailwindcss.com/) - Framework de utilidades CSS para un estilizado rápido y moderno
+- [TypeScript](https://www.typescriptlang.org/) - Tipado estático para código más robusto
+- **IndexedDB** - Base de datos en el navegador para almacenamiento persistente
+
+## 🛠️ Instalación y Uso Local
+
+Para correr este proyecto en tu máquina local, sigue estos pasos:
+
+### 1. Clonar el repositorio
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/codexyzdev/motomaint.git
+cd motomaint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Instalar dependencias
+Asegúrate de tener [Node.js](https://nodejs.org/) instalado. Luego ejecuta:
+```bash
+npm install
+# o con pnpm
+pnpm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Ejecutar el servidor de desarrollo
+```bash
+npm run dev
+# o con pnpm
+pnpm dev
+```
+La aplicación estará disponible en [http://localhost:3000](http://localhost:3000).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📂 Estructura del Proyecto
 
-## Learn More
+- `app/` - Rutas, páginas y estilos globales de Next.js.
+- `components/` - Componentes reutilizables de UI (botones, modales, tarjetas).
+- `lib/` - Lógica de negocio y configuración de base de datos local (IndexedDB).
+- `public/` - Archivos estáticos como iconos y manifest para PWA.
 
-To learn more about Next.js, take a look at the following resources:
+## 👨‍💻 Autor
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**codexyzdev**
+- GitHub: [@codexyzdev](https://github.com/codexyzdev)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+⭐ Si este proyecto te resulta útil, ¡no olvides darle una estrella en GitHub!
