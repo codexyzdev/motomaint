@@ -210,9 +210,6 @@ export default function SettingsView() {
             </svg>
           </button>
         </div>
-        <div className="view-folio">
-          <div><b>Folio</b> · 002</div>
-        </div>
       </header>
 
       <div className="settings-container">
