@@ -63,14 +63,14 @@
 html, body {
   margin: 0;
   padding: 0;
-  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-poppins), 'Poppins', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 400;
   background-color: var(--ink);
   color: var(--text);
   min-height: 100vh;
   overscroll-behavior: none;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  font-feature-settings: "ss01", "ss02", "cv11";
 }
 
 /* ============ FONDO EDITORIAL ============ */
@@ -144,41 +144,40 @@ body {
 
 /* ============ TOKENS TIPOGRÁFICOS ============ */
 .t-display {
-  font-family: var(--font-display), Georgia, serif;
-  font-optical-sizing: auto;
-  font-variation-settings: "opsz" 144;
-  letter-spacing: -0.02em;
-  line-height: 1.02;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
 }
 .t-display-sm {
-  font-family: var(--font-display), Georgia, serif;
-  font-optical-sizing: auto;
-  font-variation-settings: "opsz" 60;
-  letter-spacing: -0.015em;
-  line-height: 1.1;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
 }
 .t-mono {
-  font-family: var(--font-mono), ui-monospace, "SF Mono", Menlo, monospace;
-  font-feature-settings: "tnum", "zero";
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
+  font-weight: 500;
+  font-feature-settings: "tnum";
   letter-spacing: -0.01em;
 }
 .t-eyebrow {
-  font-family: var(--font-mono), monospace;
-  font-size: 0.68rem;
-  font-weight: 500;
-  letter-spacing: 0.22em;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--text-dim);
 }
 .t-eyebrow-muted {
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.65rem;
   font-weight: 500;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--text-mute);
 }
-.t-rule { font-family: var(--font-mono), monospace; font-size: 0.7rem; letter-spacing: 0.18em; color: var(--text-mute); text-transform: uppercase; }
+.t-rule { font-family: var(--font-poppins), 'Poppins', sans-serif; font-size: 0.72rem; font-weight: 500; letter-spacing: 0.15em; color: var(--text-mute); text-transform: uppercase; }
 
 /* ============ UTILIDADES DE FONDO ============ */
 .bg-paper-rule {
@@ -237,11 +236,10 @@ body {
   pointer-events: none;
 }
 .splash-name {
-  font-family: var(--font-display), serif;
-  font-variation-settings: "opsz" 144;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 2.2rem;
-  font-weight: 600;
-  letter-spacing: -0.03em;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   line-height: 1;
   background: linear-gradient(180deg, var(--paper) 0%, var(--accent-hot) 100%);
   -webkit-background-clip: text;
@@ -250,7 +248,7 @@ body {
   animation: riseIn 0.5s var(--t) 0.1s both;
 }
 .splash-tag {
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.65rem;
   letter-spacing: 0.4em;
   color: var(--text-mute);
@@ -285,7 +283,7 @@ body {
   background: var(--text-line);
 }
 .view-eyebrow {
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.65rem;
   letter-spacing: 0.35em;
   color: var(--accent);
@@ -303,17 +301,16 @@ body {
   display: inline-block;
 }
 .view-title {
-  font-family: var(--font-display), serif;
-  font-variation-settings: "opsz" 144;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 1.85rem;
-  font-weight: 600;
+  font-weight: 700;
   margin: 0;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   line-height: 1;
   color: var(--paper);
 }
 .view-folio {
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.7rem;
   letter-spacing: 0.18em;
   color: var(--text-mute);
@@ -349,7 +346,7 @@ body {
   align-items: center;
   gap: 12px;
   color: var(--text-mute);
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.65rem;
   letter-spacing: 0.3em;
   text-transform: uppercase;
@@ -371,7 +368,7 @@ body {
   gap: 12px;
   margin: 26px 0 14px;
   color: var(--text-mute);
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.62rem;
   letter-spacing: 0.32em;
   text-transform: uppercase;
@@ -394,7 +391,7 @@ body {
   padding: 4px 10px;
   border: 1px solid var(--text-line);
   border-radius: 999px;
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.62rem;
   letter-spacing: 0.25em;
   text-transform: uppercase;
@@ -420,7 +417,7 @@ body {
   position: absolute;
   top: 64px;
   right: 32px;
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.6rem;
   letter-spacing: 0.3em;
   color: var(--text-mute);
@@ -452,13 +449,12 @@ body {
 .onboarding-illu::after  { inset: -20px; opacity: 0.18; }
 
 .onboarding h1 {
-  font-family: var(--font-display), serif;
-  font-variation-settings: "opsz" 144;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 2.6rem;
-  font-weight: 500;
+  font-weight: 700;
   margin: 0 0 16px;
-  letter-spacing: -0.035em;
-  line-height: 0.98;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
   color: var(--paper);
 }
 .onboarding h1 .accent {
@@ -466,7 +462,7 @@ body {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  font-style: italic;
+  font-style: normal;
 }
 .onboarding-lead {
   color: var(--text-dim);
@@ -486,7 +482,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.65rem;
   font-weight: 500;
   letter-spacing: 0.28em;
@@ -496,7 +492,7 @@ body {
   padding: 0 2px;
 }
 .form-label-counter {
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.6rem;
   letter-spacing: 0.15em;
   color: var(--text-mute);
@@ -515,7 +511,7 @@ body {
   border-radius: var(--r-sm);
   color: var(--paper);
   font-size: 1rem;
-  font-family: var(--font-body), sans-serif;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
   outline: none;
   caret-color: var(--accent);
@@ -528,7 +524,7 @@ body {
   box-shadow: 0 0 0 4px var(--accent-wash);
 }
 .input[inputmode="numeric"], .form-input[type="number"] {
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-feature-settings: "tnum";
   letter-spacing: 0.01em;
 }
@@ -544,7 +540,7 @@ body {
 .input-counter {
   display: block;
   text-align: right;
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.6rem;
   letter-spacing: 0.18em;
   color: var(--text-mute);
@@ -562,7 +558,7 @@ body {
   border-radius: var(--r-sm);
   font-size: 0.95rem;
   font-weight: 600;
-  font-family: var(--font-body), sans-serif;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   letter-spacing: 0.01em;
   cursor: pointer;
   display: inline-flex;
@@ -654,7 +650,7 @@ body {
   z-index: 1;
 }
 .moto-eyebrow {
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.62rem;
   letter-spacing: 0.3em;
   text-transform: uppercase;
@@ -662,8 +658,7 @@ body {
   margin: 0 0 4px;
 }
 .moto-name {
-  font-family: var(--font-display), serif;
-  font-variation-settings: "opsz" 144;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 1.4rem;
   font-weight: 600;
   margin: 0;
@@ -686,7 +681,7 @@ body {
 }
 .moto-name button:hover { color: var(--accent); background: var(--accent-wash); }
 .moto-status-pill {
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.58rem;
   letter-spacing: 0.25em;
   text-transform: uppercase;
@@ -724,7 +719,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.6rem;
   letter-spacing: 0.3em;
   text-transform: uppercase;
@@ -738,12 +733,11 @@ body {
   gap: 12px;
 }
 .odo-number {
-  font-family: var(--font-display), serif;
-  font-variation-settings: "opsz" 144;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 3.4rem;
-  font-weight: 600;
-  line-height: 0.92;
-  letter-spacing: -0.04em;
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.025em;
   background: linear-gradient(180deg, var(--paper) 0%, var(--paper-dim) 100%);
   -webkit-background-clip: text;
   background-clip: text;
@@ -754,7 +748,7 @@ body {
 }
 .odo-number.tick { animation: odoTick 0.5s var(--t); }
 .odo-unit {
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.75rem;
   letter-spacing: 0.25em;
   text-transform: uppercase;
@@ -774,7 +768,7 @@ body {
   border: 1px solid var(--text-line);
   border-radius: var(--r-sm);
   color: var(--text);
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.78rem;
   font-weight: 500;
   letter-spacing: 0.05em;
@@ -796,14 +790,14 @@ body {
   gap: 10px;
   position: relative;
   z-index: 1;
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   letter-spacing: 0.05em;
 }
 .alert-banner b { color: inherit; font-weight: 600; }
 .alert-banner.urgent  { background: rgba(196, 74, 58, 0.1);  border: 1px solid rgba(196, 74, 58, 0.4);  color: var(--stamp-urgent); }
 .alert-banner.warning { background: rgba(212, 154, 58, 0.1); border: 1px solid rgba(212, 154, 58, 0.4); color: var(--stamp-warn); }
 .alert-banner .alert-mark {
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.6rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -832,7 +826,7 @@ body {
   background: transparent;
   border: none;
   color: var(--text-mute);
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.72rem;
   font-weight: 500;
   letter-spacing: 0.25em;
@@ -922,7 +916,7 @@ body {
   letter-spacing: -0.005em;
 }
 .service-stamp {
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.6rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -940,7 +934,7 @@ body {
 .service-stamp.urgent  { color: var(--stamp-urgent); animation: stampIn 0.55s var(--t) both; }
 
 .service-status {
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.72rem;
   color: var(--text-dim);
   display: flex;
@@ -1023,7 +1017,7 @@ body {
   color: var(--paper);
 }
 .history-meta {
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.72rem;
   color: var(--text-dim);
   letter-spacing: 0.04em;
@@ -1066,7 +1060,7 @@ body {
   background: var(--accent);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--ink);
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.25em;
@@ -1173,7 +1167,7 @@ body {
   background: var(--text-line);
 }
 .modal-eyebrow {
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.6rem;
   letter-spacing: 0.3em;
   text-transform: uppercase;
@@ -1189,8 +1183,7 @@ body {
   background: var(--accent);
 }
 .modal-title {
-  font-family: var(--font-display), serif;
-  font-variation-settings: "opsz" 144;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 1.55rem;
   font-weight: 600;
   margin: 0;
@@ -1202,7 +1195,7 @@ body {
   color: var(--text-dim);
   margin: 0 0 22px;
   font-size: 0.9rem;
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   letter-spacing: 0.03em;
   line-height: 1.5;
   padding-bottom: 18px;
@@ -1242,8 +1235,7 @@ body {
 
 /* Modal: reasignación de h2/h3 que vinieron en títulos planos */
 .modal h2 {
-  font-family: var(--font-display), serif;
-  font-variation-settings: "opsz" 144;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 1.5rem;
   font-weight: 600;
   margin: 0 0 4px;
@@ -1295,7 +1287,7 @@ body {
   color: var(--paper);
   padding: 12px 18px 12px 16px;
   border-radius: var(--r-sm);
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.78rem;
   letter-spacing: 0.05em;
   box-shadow: var(--shadow-lift);
@@ -1355,7 +1347,7 @@ body {
 }
 .service-type-name { font-weight: 600; font-size: 0.95rem; color: var(--paper); }
 .service-type-status {
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.6rem;
   letter-spacing: 0.25em;
   text-transform: uppercase;
@@ -1455,14 +1447,14 @@ body {
   border-radius: var(--r-sm);
 }
 .service-detail-info .detail-row .label {
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.62rem;
   letter-spacing: 0.25em;
   text-transform: uppercase;
   color: var(--text-mute);
 }
 .service-detail-info .detail-row .value {
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.95rem;
   color: var(--paper);
   font-weight: 500;
@@ -1475,7 +1467,7 @@ body {
 .settings { min-height: 100vh; }
 .settings-section { margin-bottom: var(--section); }
 .settings-section h2 {
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.65rem;
   font-weight: 500;
   letter-spacing: 0.3em;
@@ -1513,7 +1505,7 @@ body {
 .settings-row-info { display: flex; flex-direction: column; gap: 2px; }
 .settings-row-title { font-weight: 600; font-size: 1rem; color: var(--paper); }
 .settings-row-subtitle {
-  font-family: var(--font-mono), monospace;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 0.72rem;
   color: var(--text-dim);
   letter-spacing: 0.04em;
@@ -1556,8 +1548,7 @@ body {
   margin-bottom: 18px;
 }
 .error-fallback h1 {
-  font-family: var(--font-display), serif;
-  font-variation-settings: "opsz" 144;
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
   font-size: 1.6rem;
   font-weight: 600;
   margin: 0 0 8px;

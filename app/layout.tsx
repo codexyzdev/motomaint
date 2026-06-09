@@ -1,26 +1,14 @@
 import type { Metadata, Viewport } from 'next';
-import { Fraunces, Manrope, JetBrains_Mono } from 'next/font/google';
+import { Poppins } from 'next/font/google';
 import './globals.css';
 import { ToastProvider } from '@/components/ui/useToast';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 
-const fraunces = Fraunces({
-  variable: '--font-display',
+const poppins = Poppins({
+  variable: '--font-poppins',
   subsets: ['latin'],
   display: 'swap',
-  axes: ['opsz'],
-});
-
-const manrope = Manrope({
-  variable: '--font-body',
-  subsets: ['latin'],
-  display: 'swap',
-});
-
-const jetbrains = JetBrains_Mono({
-  variable: '--font-mono',
-  subsets: ['latin'],
-  display: 'swap',
+  weight: ['300', '400', '500', '600', '700', '800'],
 });
 
 export const metadata: Metadata = {
@@ -45,7 +33,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${fraunces.variable} ${manrope.variable} ${jetbrains.variable} h-full antialiased`}
+      className={`${poppins.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <ErrorBoundary>
