@@ -744,11 +744,17 @@ textarea.input {
   border-radius: var(--radius-sm);
   padding: 14px 16px;
   margin-bottom: 8px;
+  width: 100%;
+  font-family: inherit;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.2s;
 }
-
-.service-type-row .st-info     { flex: 1; }
-.service-type-row .st-name     { font-weight: 600; }
-.service-type-row .st-interval { font-size: 0.82rem; color: var(--text-dim); }
+.service-type-row:hover { background: var(--bg-elev-2); }
+.service-type-row.disabled { opacity: 0.6; }
+.service-type-icon { font-size: 1.4rem; flex-shrink: 0; }
+.service-type-name { flex: 1; font-weight: 600; text-align: left; }
+.service-type-status { font-size: 0.8rem; color: var(--text-dim); }
 
 /* ============ TOP BAR ============ */
 .top-bar {
