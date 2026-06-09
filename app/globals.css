@@ -1508,7 +1508,8 @@ body {
 /* ====================================================
    SETTINGS — secciones
    ==================================================== */
-.settings { min-height: 100vh; }
+.settings { min-height: 100vh; padding-top: 0; }
+.settings > .view-header { padding-left: var(--rail); padding-right: var(--rail); }
 .settings-section { margin-bottom: var(--section); }
 .settings-section h2 {
   font-family: var(--font-poppins), 'Poppins', sans-serif;

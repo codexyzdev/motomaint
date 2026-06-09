@@ -193,7 +193,7 @@ export default function SettingsView() {
 
   return (
     <div className="settings">
-      <header className="view-header view-header--with-back">
+      <header className="view-header">
         <div className="view-header-main">
           <div className="view-header-titles">
             <p className="view-eyebrow">Cuaderno · Configuración</p>
@@ -212,7 +212,6 @@ export default function SettingsView() {
         </div>
         <div className="view-folio">
           <div><b>Folio</b> · 002</div>
-          <div>APUNTES</div>
         </div>
       </header>
 
