@@ -13,6 +13,8 @@ interface ModalAction {
 interface ModalProps {
   title: string;
   subtitle?: string;
+  eyebrow?: string;
+  folio?: string;
   children?: React.ReactNode;
   actions?: ModalAction[];
   onClose: () => void;
@@ -24,6 +26,8 @@ const MAX_ACTIONS = 4;
 export default function Modal({
   title,
   subtitle,
+  eyebrow,
+  folio,
   children,
   actions,
   onClose,
@@ -47,20 +51,33 @@ export default function Modal({
         <DialogPrimitive.Overlay className="modal-backdrop" />
         <DialogPrimitive.Content className="modal">
           <div className="modal-handle" />
-          <DialogPrimitive.Title className="modal-title">{title}</DialogPrimitive.Title>
+
+          <div className="modal-head">
+            <div>
+              {eyebrow && <div className="modal-eyebrow">{eyebrow}</div>}
+              <DialogPrimitive.Title className="modal-title">{title}</DialogPrimitive.Title>
+            </div>
+            {folio && (
+              <div className="view-folio" style={{ paddingBottom: 0 }}>
+                <span style={{ color: 'var(--accent)' }}>●</span> {folio}
+              </div>
+            )}
+          </div>
+
           {subtitle && (
             <DialogPrimitive.Description className="modal-subtitle">
               {subtitle}
             </DialogPrimitive.Description>
           )}
+
           <DialogPrimitive.Close
             className="modal-close-btn"
             aria-label="Cerrar"
             tabIndex={dismissible ? 0 : -1}
           >
             <svg
-              width="20"
-              height="20"
+              width="16"
+              height="16"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -70,6 +87,7 @@ export default function Modal({
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </DialogPrimitive.Close>
+
           {children}
           {renderedActions && (
             <div className="modal-actions">

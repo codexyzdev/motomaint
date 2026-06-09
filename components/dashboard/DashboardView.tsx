@@ -53,8 +53,8 @@ export default function DashboardView() {
     refresh();
   }, [refresh]);
 
-  const urgentCount = services.filter(s => s.status === 'urgent').length;
-  const warningCount = services.filter(s => s.status === 'warning').length;
+  const urgentCount = services.filter((s) => s.status === 'urgent').length;
+  const warningCount = services.filter((s) => s.status === 'warning').length;
 
   function openEditMoto() {
     if (!moto) return;
@@ -118,7 +118,7 @@ export default function DashboardView() {
   }
 
   function handleDeleteRecordClick(id: string) {
-    const record = history.find(r => r.id === id);
+    const record = history.find((r) => r.id === id);
     if (record) {
       setModalState({ type: 'confirmDeleteRecord', record });
     }
@@ -139,37 +139,47 @@ export default function DashboardView() {
   if (!moto) {
     return (
       <div className="splash" role="status" aria-label="Cargando">
-        <div className="splash-logo" aria-hidden="true">
-          <span style={{ fontSize: '3rem' }}>🏍️</span>
+        <div className="splash-mark" aria-hidden="true">
+          <span style={{ fontSize: '1.5rem' }}>🏍️</span>
         </div>
-        <p>MotoMaint</p>
+        <p className="splash-name">MotoMaint</p>
+        <span className="splash-tag">Hoja de inspección</span>
       </div>
     );
   }
 
+  const today = new Date();
+  const folioDate = today.toLocaleDateString('es-CO', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).toUpperCase();
+
   return (
     <div className="dashboard">
       <div className="dashboard-container">
-        <header className="top-bar">
-          <h1>MotoMaint</h1>
-          <button
-            className="icon-btn"
-            onClick={() => router.push('/settings')}
-            aria-label="Ajustes"
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <circle cx="12" cy="12" r="3" />
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-            </svg>
-          </button>
+        <header className="view-header">
+          <div>
+            <p className="view-eyebrow">Cuaderno de bitácora</p>
+            <h1 className="view-title">MotoMaint</h1>
+          </div>
+          <div className="view-folio">
+            <div><b>Folio</b> · 001</div>
+            <div>{folioDate}</div>
+          </div>
         </header>
+
+        <button
+          className="icon-btn"
+          onClick={() => router.push('/settings')}
+          aria-label="Ajustes"
+          style={{ position: 'fixed', top: 18, right: 20, zIndex: 40 }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+        </button>
 
         <MotoCard
           moto={moto}
@@ -179,6 +189,12 @@ export default function DashboardView() {
           onEditKm={openEditKm}
           onEditMoto={openEditMoto}
         />
+
+        <div className="rule-numbered">
+          <span>·</span>
+          <b>02 — Servicios</b>
+          <span>·</span>
+        </div>
 
         <ServiceTabs
           activeTab={activeTab}
@@ -205,15 +221,21 @@ export default function DashboardView() {
 
       {modalState.type === 'editKm' && (
         <Modal
+          eyebrow="Sec. 01 · Odómetro"
           title="Editar kilometraje"
+          subtitle="Ingresa la lectura actual del odómetro de tu moto."
+          folio="F-01A"
           onClose={closeModal}
           actions={[
             { label: 'Cancelar', variant: 'btn-ghost', onClick: closeModal },
-            { label: 'Guardar', variant: 'btn-primary', onClick: handleSaveKm },
+            { label: 'Guardar lectura', variant: 'btn-primary', onClick: handleSaveKm },
           ]}
         >
           <div className="form-group">
-            <label htmlFor="edit-km">Kilómetros</label>
+            <label htmlFor="edit-km">
+              <span>Kilómetros</span>
+              <span className="form-label-counter">máx. <b>999.999</b></span>
+            </label>
             <input
               id="edit-km"
               type="number"
@@ -230,7 +252,10 @@ export default function DashboardView() {
 
       {modalState.type === 'servicePicker' && (
         <Modal
-          title="Registrar mantenimiento"
+          eyebrow="Sec. 02 · Registro"
+          title="¿Qué mantuviste?"
+          subtitle="Elige el servicio que acabas de realizar. Lo sellaremos en tu bitácora."
+          folio="F-02A"
           onClose={closeModal}
         >
           <div className="service-picker-grid">
@@ -239,6 +264,7 @@ export default function DashboardView() {
                 key={service.id}
                 className="service-picker-item"
                 onClick={() => handleServiceSelect(service)}
+                type="button"
               >
                 <span className="service-picker-icon" aria-hidden="true">{service.icon}</span>
                 <span className="service-picker-name">{service.name}</span>
@@ -267,6 +293,7 @@ export default function DashboardView() {
 
       {modalState.type === 'confirmDeleteRecord' && (
         <ConfirmDialog
+          eyebrow="Archivo · Eliminar"
           title="Eliminar registro"
           message="¿Estás seguro de que quieres eliminar este registro? Esta acción no se puede deshacer."
           confirmLabel="Eliminar"
@@ -315,16 +342,20 @@ function RecordServiceModal({
 
   return (
     <Modal
+      eyebrow="Sec. 02 · Sello de servicio"
       title={`Registrar ${service.name}`}
-      subtitle={`Último servicio: ${defaultKm.toLocaleString('es-CO')} km`}
+      subtitle={`Último servicio registrado: ${defaultKm.toLocaleString('es-CO')} km`}
+      folio="F-02B"
       onClose={onClose}
       actions={[
         { label: 'Cancelar', variant: 'btn-ghost', onClick: onClose },
-        { label: 'Guardar', variant: 'btn-primary', onClick: handleSave },
+        { label: 'Sellar registro', variant: 'btn-primary', onClick: handleSave },
       ]}
     >
       <div className="form-group">
-        <label htmlFor={`${idPrefix}-km`}>Kilómetros</label>
+        <label htmlFor={`${idPrefix}-km`}>
+          <span>Kilómetros al servicio</span>
+        </label>
         <input
           id={`${idPrefix}-km`}
           type="number"
@@ -337,7 +368,12 @@ function RecordServiceModal({
         />
       </div>
       <div className="form-group">
-        <label htmlFor={`${idPrefix}-notes`}>Notas (opcional)</label>
+        <label htmlFor={`${idPrefix}-notes`}>
+          <span>Notas del taller</span>
+          <span className="form-label-counter">
+            <b>{recordNotes.length}</b>/{MAX_NOTES_LENGTH}
+          </span>
+        </label>
         <textarea
           id={`${idPrefix}-notes`}
           className="input"
@@ -346,9 +382,6 @@ function RecordServiceModal({
           rows={3}
           maxLength={MAX_NOTES_LENGTH}
         />
-        <span className="input-counter" aria-live="polite">
-          {recordNotes.length}/{MAX_NOTES_LENGTH}
-        </span>
       </div>
     </Modal>
   );
@@ -356,37 +389,43 @@ function RecordServiceModal({
 
 function ServiceDetailModal({ service, onClose }: { service: ServicioCalculado; onClose: () => void }) {
   const statusText = {
-    urgent: 'Vencido',
-    warning: 'Por vencer',
-    ok: 'OK',
+    urgent: 'Vencido · requiere atención',
+    warning: 'Por vencer · atento',
+    ok: 'En orden',
   }[service.status];
 
   return (
     <Modal
+      eyebrow={`Servicio · ${service.status === 'urgent' ? 'Crítico' : service.status === 'warning' ? 'Alerta' : 'Saludable'}`}
       title={service.name}
       subtitle={statusText}
+      folio="F-02C"
       onClose={onClose}
       actions={[
-        { label: 'Cerrar', variant: 'btn-primary', onClick: onClose },
+        { label: 'Cerrar', variant: 'btn-secondary', onClick: onClose },
       ]}
     >
       <div className="service-detail-info">
-        <div className={`service-status ${service.status}`} aria-hidden="true">
-          {service.status === 'urgent' && '⚠️'}
-          {service.status === 'warning' && '⏰'}
-          {service.status === 'ok' && '✅'}
-        </div>
         {service.kmRemaining !== null && (
-          <p>Kilómetros restantes: {service.kmRemaining} km</p>
+          <div className="detail-row">
+            <span className="label">Km restantes</span>
+            <span className="value">{service.kmRemaining.toLocaleString('es-CO')} km</span>
+          </div>
         )}
         {service.daysRemaining !== null && (
-          <p>Días restantes: {service.daysRemaining}</p>
+          <div className="detail-row">
+            <span className="label">Días restantes</span>
+            <span className="value">{service.daysRemaining} d</span>
+          </div>
         )}
         {service.lastRecord && (
-          <p>
-            Último servicio: {service.lastRecord.km} km —{' '}
-            {new Date(service.lastRecord.date).toLocaleDateString('es-CO')}
-          </p>
+          <div className="detail-row">
+            <span className="label">Último servicio</span>
+            <span className="value">
+              {service.lastRecord.km.toLocaleString('es-CO')} km ·{' '}
+              {new Date(service.lastRecord.date).toLocaleDateString('es-CO')}
+            </span>
+          </div>
         )}
       </div>
     </Modal>

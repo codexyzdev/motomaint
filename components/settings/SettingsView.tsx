@@ -182,61 +182,68 @@ export default function SettingsView() {
   if (!moto) {
     return (
       <div className="splash" role="status" aria-label="Cargando">
-        <div className="splash-logo" aria-hidden="true">
-          <span style={{ fontSize: '3rem' }}>🏍️</span>
+        <div className="splash-mark" aria-hidden="true">
+          <span style={{ fontSize: '1.5rem' }}>🏍️</span>
         </div>
-        <p>MotoMaint</p>
+        <p className="splash-name">MotoMaint</p>
+        <span className="splash-tag">Hoja de inspección</span>
       </div>
     );
   }
 
   return (
     <div className="settings">
-      <header className="top-bar">
-        <button
-          className="icon-btn back-btn"
-          onClick={() => router.back()}
-          aria-label="Volver"
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
+      <header className="view-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button
+            className="icon-btn"
+            onClick={() => router.back()}
+            aria-label="Volver"
+            type="button"
           >
-            <path d="M19 12H5M12 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <h1>Ajustes</h1>
-        <div style={{ width: 40 }} />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <div>
+            <p className="view-eyebrow">Cuaderno · Configuración</p>
+            <h1 className="view-title">Ajustes</h1>
+          </div>
+        </div>
+        <div className="view-folio">
+          <div><b>Folio</b> · 002</div>
+          <div>APUNTES</div>
+        </div>
       </header>
 
       <div className="settings-container">
         <section className="settings-section">
           <h2>Tu moto</h2>
-          <button className="settings-row" onClick={openEditMoto}>
+          <button className="settings-row" onClick={openEditMoto} type="button">
             <div className="settings-row-info">
               <span className="settings-row-title">{moto.marca} {moto.modelo}</span>
-              <span className="settings-row-subtitle">{moto.kmActual.toLocaleString('es-CO')} km</span>
+              <span className="settings-row-subtitle">
+                Odómetro · {moto.kmActual.toLocaleString('es-CO')} km
+              </span>
             </div>
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
+            <svg className="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M9 18l6-6-6-6" />
             </svg>
           </button>
         </section>
 
         <section className="settings-section">
-          <h2>Servicios</h2>
+          <h2>Servicios registrados</h2>
           <div className="service-list">
+            {services.length === 0 && (
+              <div className="empty" style={{ padding: '28px 18px' }}>
+                <div className="empty-icon" aria-hidden="true">⚙</div>
+                <p className="empty-text">
+                  <b>Sin servicios aún.</b><br />
+                  Crea el primero con el botón inferior.
+                </p>
+              </div>
+            )}
             {services.map((service) => (
               <ServiceTypeRow
                 key={service.id}
@@ -246,16 +253,16 @@ export default function SettingsView() {
             ))}
           </div>
           <button className="btn btn-secondary add-service-btn" onClick={openAddService}>
-            + Agregar servicio personalizado
+            <span style={{ color: 'var(--accent)' }}>+</span> Agregar servicio personalizado
           </button>
         </section>
 
         <section className="settings-section">
-          <h2>Backup</h2>
-          <button className="btn btn-secondary" onClick={handleExport}>
-            Exportar datos
+          <h2>Respaldo</h2>
+          <button className="btn btn-secondary" onClick={handleExport} type="button">
+            Exportar datos · JSON
           </button>
-          <button className="btn btn-secondary" onClick={handleImportClick}>
+          <button className="btn btn-secondary" onClick={handleImportClick} type="button">
             Importar datos
           </button>
           <input
@@ -269,7 +276,7 @@ export default function SettingsView() {
 
         <section className="settings-section danger-zone">
           <h2>Zona de peligro</h2>
-          <button className="btn btn-danger" onClick={openConfirmReset}>
+          <button className="btn btn-danger" onClick={openConfirmReset} type="button">
             Borrar todo y empezar de cero
           </button>
         </section>
@@ -287,7 +294,10 @@ export default function SettingsView() {
 
       {modalState.type === 'editService' && (
         <Modal
+          eyebrow={modalState.service ? 'Servicio · Editar' : 'Servicio · Nuevo'}
           title={modalState.service ? 'Editar servicio' : 'Agregar servicio'}
+          subtitle="Define los intervalos en kilómetros o días. Se usan para calcular el estado."
+          folio="F-02D"
           onClose={closeModal}
           actions={[
             { label: 'Cancelar', variant: 'btn-ghost', onClick: closeModal },
@@ -295,7 +305,9 @@ export default function SettingsView() {
           ]}
         >
           <div className="form-group">
-            <label htmlFor="service-name">Nombre</label>
+            <label htmlFor="service-name">
+              <span>Nombre</span>
+            </label>
             <input
               id="service-name"
               type="text"
@@ -303,6 +315,7 @@ export default function SettingsView() {
               value={editServiceName}
               onChange={(e) => setEditServiceName(e.target.value)}
               maxLength={50}
+              placeholder="Ej: Cambio de aceite"
             />
           </div>
 
@@ -313,7 +326,9 @@ export default function SettingsView() {
 
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="service-km">Intervalo km</label>
+              <label htmlFor="service-km">
+                <span>Intervalo km</span>
+              </label>
               <input
                 id="service-km"
                 type="number"
@@ -322,11 +337,13 @@ export default function SettingsView() {
                 value={editServiceIntervalKm}
                 onChange={(e) => setEditServiceIntervalKm(e.target.value)}
                 min={0}
-                placeholder="Ej: 3000"
+                placeholder="3000"
               />
             </div>
             <div className="form-group">
-              <label htmlFor="service-days">Intervalo días</label>
+              <label htmlFor="service-days">
+                <span>Intervalo días</span>
+              </label>
               <input
                 id="service-days"
                 type="number"
@@ -335,7 +352,7 @@ export default function SettingsView() {
                 value={editServiceIntervalDays}
                 onChange={(e) => setEditServiceIntervalDays(e.target.value)}
                 min={0}
-                placeholder="Ej: 30"
+                placeholder="30"
               />
             </div>
           </div>
@@ -350,6 +367,9 @@ export default function SettingsView() {
               >
                 {editServiceEnabled ? 'Desactivar' : 'Activar'}
               </button>
+              <button type="button" className="btn btn-danger" onClick={handleDeleteService}>
+                Eliminar
+              </button>
             </div>
           )}
         </Modal>
@@ -357,6 +377,7 @@ export default function SettingsView() {
 
       {modalState.type === 'resetIntent' && (
         <ConfirmDialog
+          eyebrow="Hoja · Reiniciar"
           title="Borrar todo"
           message="Se eliminarán la moto, servicios e historial. Esta acción no se puede deshacer. ¿Deseas continuar?"
           confirmLabel="Sí, continuar"
@@ -371,9 +392,10 @@ export default function SettingsView() {
 
       {modalState.type === 'resetFinal' && (
         <ConfirmDialog
+          eyebrow="Confirmación final"
           title="Última confirmación"
           message="Esta es tu última oportunidad para cancelar. ¿Confirmas que quieres borrar todos los datos?"
-          confirmLabel="Borrar todo definitivamente"
+          confirmLabel="Borrar definitivamente"
           cancelLabel="Cancelar"
           danger
           onConfirm={handleConfirmReset}

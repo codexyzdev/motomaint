@@ -25,18 +25,22 @@ export default function ServiceTabs({
 }: ServiceTabsProps) {
   return (
     <div>
-      <div className="tabs">
+      <div className="tabs" role="tablist">
         <button
+          role="tab"
+          aria-selected={activeTab === 'services'}
           className={activeTab === 'services' ? 'tab active' : 'tab'}
           onClick={() => onTabChange('services')}
         >
-          Servicios
+          Servicios · {services.length}
         </button>
         <button
+          role="tab"
+          aria-selected={activeTab === 'history'}
           className={activeTab === 'history' ? 'tab active' : 'tab'}
           onClick={() => onTabChange('history')}
         >
-          Historial
+          Historial · {history.length}
         </button>
       </div>
 
@@ -44,20 +48,28 @@ export default function ServiceTabs({
         <>
           {services.length === 0 ? (
             <div className="empty">
-              <div className="empty-icon">🔧</div>
-              <div className="empty-text">
-                No hay servicios configurados. Ve a Ajustes para agregar.
-              </div>
+              <div className="empty-icon" aria-hidden="true">🔧</div>
+              <p className="empty-text">
+                <b>Sin servicios configurados.</b><br />
+                Ve a Ajustes para añadir los mantenimientos de tu moto.
+              </p>
             </div>
           ) : (
-            services.map((service) => (
-              <ServiceCard
-                key={service.id}
-                service={service}
-                onCardClick={onServiceCardClick}
-                onCheckClick={onServiceCheckClick}
-              />
-            ))
+            <div className="service-list">
+              {services.map((service, i) => (
+                <div
+                  key={service.id}
+                  className="anim-rise"
+                  style={{ animationDelay: `${0.04 * i}s` }}
+                >
+                  <ServiceCard
+                    service={service}
+                    onCardClick={onServiceCardClick}
+                    onCheckClick={onServiceCheckClick}
+                  />
+                </div>
+              ))}
+            </div>
           )}
         </>
       )}
@@ -66,19 +78,27 @@ export default function ServiceTabs({
         <>
           {history.length === 0 ? (
             <div className="empty">
-              <div className="empty-icon">📋</div>
-              <div className="empty-text">
-                Sin mantenimientos registrados aún. ¡Registra el primero!
-              </div>
+              <div className="empty-icon" aria-hidden="true">📋</div>
+              <p className="empty-text">
+                <b>Aún no hay registros.</b><br />
+                Sella tu primer mantenimiento con el botón inferior.
+              </p>
             </div>
           ) : (
-            history.slice(0, 30).map((record) => (
-              <HistoryItem
-                key={record.id}
-                record={record}
-                onDelete={onDeleteRecord}
-              />
-            ))
+            <div className="service-list">
+              {history.slice(0, 30).map((record, i) => (
+                <div
+                  key={record.id}
+                  className="anim-rise"
+                  style={{ animationDelay: `${0.04 * i}s` }}
+                >
+                  <HistoryItem
+                    record={record}
+                    onDelete={onDeleteRecord}
+                  />
+                </div>
+              ))}
+            </div>
           )}
         </>
       )}

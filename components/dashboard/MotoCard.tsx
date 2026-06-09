@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import { data } from '@/lib/data';
 import { formatNumber } from '@/lib/helpers';
 import type { Moto } from '@/lib/types';
@@ -21,65 +22,86 @@ export default function MotoCard({
   onEditKm,
   onEditMoto,
 }: MotoCardProps) {
+  const [odoDisplay, setOdoDisplay] = useState(moto.kmActual);
+  const [tick, setTick] = useState(false);
+  const prevKm = useRef(moto.kmActual);
+
+  useEffect(() => {
+    if (moto.kmActual !== prevKm.current) {
+      setOdoDisplay(moto.kmActual);
+      setTick(true);
+      const t = setTimeout(() => setTick(false), 520);
+      prevKm.current = moto.kmActual;
+      return () => clearTimeout(t);
+    }
+  }, [moto.kmActual]);
+
   async function handleDelta(delta: number) {
-    const updated = await data.updateKm(moto.kmActual + delta);
+    const next = Math.max(0, moto.kmActual + delta);
+    const updated = await data.updateKm(next);
     onKmUpdated(updated.kmActual);
   }
 
+  const stampText = urgentCount > 0
+    ? `${urgentCount} vencido${urgentCount !== 1 ? 's' : ''}`
+    : warningCount > 0
+      ? `${warningCount} por vencer`
+      : 'Todo en orden';
+
   return (
-    <div className="moto-card">
-      <div className="moto-label">Tu moto</div>
-      <h2 className="moto-name">
-        <span>
-          {moto.marca} {moto.modelo}
-        </span>
-        <button onClick={onEditMoto} aria-label="Editar moto">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-          </svg>
-        </button>
-      </h2>
+    <article className="moto-card anim-rise">
+      <header className="moto-card-head">
+        <div>
+          <p className="moto-eyebrow">Vehículo · Ficha 01</p>
+          <h2 className="moto-name">
+            <span>
+              {moto.marca} <span style={{ color: 'var(--text-mute)', fontWeight: 400 }}>{moto.modelo}</span>
+            </span>
+            <button onClick={onEditMoto} aria-label="Editar moto">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+            </button>
+          </h2>
+        </div>
+        <span className="moto-status-pill">{stampText}</span>
+      </header>
 
-      <div className="moto-label">Kilometraje actual</div>
-      <div className="km-display">
-        <span className="km-number">{formatNumber(moto.kmActual)}</span>
-        <span className="km-unit">km</span>
-      </div>
+      <div className="odometer">
+        <div className="odometer-label">
+          <span>Odómetro</span>
+          <span>Lectura actual</span>
+        </div>
+        <div className="odo-row">
+          <span className={`odo-number ${tick ? 'tick' : ''}`} key={odoDisplay}>
+            {formatNumber(odoDisplay)}
+          </span>
+          <span className="odo-unit">km</span>
+        </div>
 
-      <div className="km-actions">
-        <button className="km-btn" onClick={() => handleDelta(-100)}>
-          −100
-        </button>
-        <button className="km-btn" onClick={() => handleDelta(100)}>
-          +100
-        </button>
-        <button className="km-btn" onClick={() => handleDelta(500)}>
-          +500
-        </button>
-        <button className="km-btn" onClick={onEditKm}>
-          Editar
-        </button>
+        <div className="km-actions" style={{ marginTop: 14 }}>
+          <button className="km-btn" onClick={() => handleDelta(-100)}>−100</button>
+          <button className="km-btn" onClick={() => handleDelta(100)}>+100</button>
+          <button className="km-btn" onClick={() => handleDelta(500)}>+500</button>
+          <button className="km-btn" onClick={onEditKm} style={{ color: 'var(--accent)' }}>Editar</button>
+        </div>
       </div>
 
       {urgentCount > 0 && (
-        <div className="alert-banner urgent">
-          ⚠️ {urgentCount} servicio{urgentCount !== 1 ? 's' : ''} vencido
-          {urgentCount !== 1 ? 's' : ''}
+        <div className="alert-banner urgent" role="alert">
+          <span>⚠</span>
+          <span><b>{urgentCount}</b> servicio{urgentCount !== 1 ? 's' : ''} vencido{urgentCount !== 1 ? 's' : ''}</span>
+          <span className="alert-mark">Atender</span>
         </div>
       )}
       {urgentCount === 0 && warningCount > 0 && (
         <div className="alert-banner warning">
-          ⏰ {warningCount} servicio{warningCount !== 1 ? 's' : ''} por vencer pronto
+          <span>◐</span>
+          <span><b>{warningCount}</b> por vencer pronto</span>
+          <span className="alert-mark">Revisar</span>
         </div>
       )}
-    </div>
+    </article>
   );
 }

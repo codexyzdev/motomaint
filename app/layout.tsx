@@ -1,17 +1,24 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, Space_Grotesk } from 'next/font/google';
+import { Fraunces, Manrope, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { ToastProvider } from '@/components/ui/useToast';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 
-const inter = Inter({
-  variable: '--font-inter',
+const fraunces = Fraunces({
+  variable: '--font-display',
+  subsets: ['latin'],
+  display: 'swap',
+  axes: ['opsz'],
+});
+
+const manrope = Manrope({
+  variable: '--font-body',
   subsets: ['latin'],
   display: 'swap',
 });
 
-const spaceGrotesk = Space_Grotesk({
-  variable: '--font-space-grotesk',
+const jetbrains = JetBrains_Mono({
+  variable: '--font-mono',
   subsets: ['latin'],
   display: 'swap',
 });
@@ -38,7 +45,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}
+      className={`${fraunces.variable} ${manrope.variable} ${jetbrains.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <ErrorBoundary>

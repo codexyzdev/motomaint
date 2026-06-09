@@ -12,7 +12,7 @@ export default function FAB({ onClick }: FABProps) {
       aria-label="Registrar mantenimiento"
       type="button"
     >
-      <span aria-hidden="true">+</span>
+      <span className="fab-icon" aria-hidden="true">+</span>
       <span className="fab-text">Registrar mantenimiento</span>
     </button>
   );

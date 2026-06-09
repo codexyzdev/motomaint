@@ -6,6 +6,8 @@ import Modal from './Modal';
 interface ConfirmDialogProps {
   title: string;
   message: string;
+  eyebrow?: string;
+  folio?: string;
   confirmLabel?: string;
   cancelLabel?: string;
   danger?: boolean;
@@ -17,6 +19,8 @@ interface ConfirmDialogProps {
 export default function ConfirmDialog({
   title,
   message,
+  eyebrow,
+  folio,
   confirmLabel = 'Confirmar',
   cancelLabel = 'Cancelar',
   danger = false,
@@ -41,6 +45,8 @@ export default function ConfirmDialog({
 
   return (
     <Modal
+      eyebrow={eyebrow}
+      folio={folio}
       title={title}
       subtitle={message}
       onClose={onCancel}
