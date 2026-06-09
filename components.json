@@ -1,0 +1,1 @@
+{"$schema":"https://shadcn.com/schema.json","style":"new-york","rsc":true,"tsx":true,"tailwind":{"css":"app/globals.css","utils":["@/lib/utils"]},"aliases":{"components":"@/components","utils":"@/lib/utils","ui":"@/components/ui","lib":"@/lib","hooks":"@/hooks"}}

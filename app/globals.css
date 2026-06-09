@@ -639,7 +639,8 @@ textarea.input {
   margin: 0 auto 18px;
 }
 
-.modal h2 {
+.modal h2,
+.modal-title {
   font-family: var(--font-space-grotesk, 'Space Grotesk'), sans-serif;
   font-size: 1.4rem;
   font-weight: 700;

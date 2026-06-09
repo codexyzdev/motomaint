@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
-import ReactDOM from 'react-dom';
+import * as React from 'react';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { cn } from '@/lib/utils';
 
 interface ModalAction {
   label: string;
@@ -13,7 +14,7 @@ interface ModalProps {
   title: string;
   subtitle?: string;
   children: React.ReactNode;
-  actions?: ModalAction[]; // max 4
+  actions?: ModalAction[];
   onClose: () => void;
 }
 
@@ -24,57 +25,35 @@ export default function Modal({
   actions,
   onClose,
 }: ModalProps) {
-  // Lock body scroll on mount, restore on unmount
-  useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, []);
-
-  // SSR safety: only render portal on the client
-  if (typeof window === 'undefined') return null;
-
-  const modal = (
-    <>
-      {/* Backdrop */}
-      <div className="modal-backdrop" onClick={onClose} />
-
-      {/* Sheet */}
-      <div
-        className="modal"
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modal-title"
-      >
-        {/* Drag handle */}
-        <div className="modal-handle" />
-
-        <h2 id="modal-title">{title}</h2>
-
-        {subtitle && <p className="modal-subtitle">{subtitle}</p>}
-
-        {children}
-
-        {actions && actions.length > 0 && (
-          <div className="modal-actions">
-            {actions.slice(0, 4).map((action) => (
-              <button
-                key={action.label}
-                className={`btn ${action.variant ?? 'btn-primary'}`}
-                onClick={action.onClick}
-                type="button"
-              >
-                {action.label}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-    </>
+  return (
+    <DialogPrimitive.Root open onOpenChange={(open) => !open && onClose()}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="modal-backdrop" />
+        <DialogPrimitive.Content className="modal">
+          <div className="modal-handle" />
+          <DialogPrimitive.Title className="modal-title">{title}</DialogPrimitive.Title>
+          {subtitle && (
+            <DialogPrimitive.Description className="modal-subtitle">
+              {subtitle}
+            </DialogPrimitive.Description>
+          )}
+          {children}
+          {actions && actions.length > 0 && (
+            <div className="modal-actions">
+              {actions.slice(0, 4).map((action) => (
+                <button
+                  key={action.label}
+                  className={cn('btn', action.variant ?? 'btn-primary')}
+                  onClick={action.onClick}
+                  type="button"
+                >
+                  {action.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
-
-  return ReactDOM.createPortal(modal, document.body);
 }
