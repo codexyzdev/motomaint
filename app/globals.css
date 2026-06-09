@@ -69,6 +69,7 @@ html, body {
   color: var(--text);
   min-height: 100vh;
   overscroll-behavior: none;
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -259,42 +260,51 @@ body {
 
 /* Cabecera de página con sello de folio */
 .view-header {
-  display: grid;
-  grid-template-columns: 1fr auto;
+  display: flex;
+  flex-wrap: wrap;
   align-items: end;
-  gap: 12px;
+  justify-content: space-between;
+  column-gap: 12px;
+  row-gap: 14px;
   padding: 18px 0 22px;
   margin-bottom: 28px;
   border-bottom: 1px solid var(--text-line);
   position: relative;
+  min-width: 0;
 }
-.view-header-main,
-.view-header-titles { min-width: 0; }
-.view-header-titles { flex: 1; }
-.view-header--with-back { row-gap: 14px; }
-.view-header--with-back .view-header-main {
+.view-header > * { min-width: 0; }
+.view-header-main {
   display: flex;
   align-items: center;
   gap: 12px;
   min-width: 0;
+  flex: 1 1 auto;
 }
+.view-header-titles { min-width: 0; flex: 1 1 auto; }
+.view-header--with-back { row-gap: 14px; }
+.view-folio {
+  font-family: var(--font-poppins), 'Poppins', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  color: var(--text-mute);
+  text-transform: uppercase;
+  text-align: right;
+  line-height: 1.4;
+  padding-bottom: 4px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  flex: 0 1 auto;
+  max-width: 100%;
+}
+.view-folio b { color: var(--accent); font-weight: 500; }
+
 @media (max-width: 380px) {
-  .view-header {
-    grid-template-columns: 1fr;
-    align-items: start;
-  }
-  .view-header .view-folio {
+  .view-folio {
     text-align: left;
     padding-bottom: 0;
-  }
-  .view-header--with-back {
-    grid-template-columns: 1fr auto;
-  }
-  .view-header--with-back .view-folio {
-    grid-column: 1 / -1;
-    text-align: left;
-    padding-top: 4px;
+    flex-basis: 100%;
     border-top: 1px dashed var(--text-line);
+    padding-top: 4px;
   }
   .view-title { font-size: 1.55rem; }
 }
@@ -332,17 +342,6 @@ body {
   line-height: 1;
   color: var(--paper);
 }
-.view-folio {
-  font-family: var(--font-poppins), 'Poppins', sans-serif;
-  font-size: 0.7rem;
-  letter-spacing: 0.18em;
-  color: var(--text-mute);
-  text-transform: uppercase;
-  text-align: right;
-  line-height: 1.4;
-  padding-bottom: 4px;
-}
-.view-folio b { color: var(--accent); font-weight: 500; }
 
 .icon-btn {
   width: 40px;
