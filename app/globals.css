@@ -3,34 +3,34 @@
 /* ===========================================================
    MotoMaint — Sistema visual "Editorial mecánico"
    Hoja de inspección de taller · Tipografía display serif
-   · Paleta tinta + marfil + ámbar · Reglas numeradas
+   · Paleta azul navy + gris acero + azul acento · Reglas numeradas
    =========================================================== */
 
 :root {
-  /* — Tinta y papel — */
-  --ink: #0c0d10;
-  --ink-2: #14161b;
-  --ink-3: #1c1f26;
-  --paper: #f3ead7;
-  --paper-dim: #d6cdb8;
-  --paper-faint: #847b67;
+  /* — Tinta y acero — */
+  --ink: #0c1118;
+  --ink-2: #131b26;
+  --ink-3: #1c2533;
+  --paper: #e4ecf3;
+  --paper-dim: #aab8c7;
+  --paper-faint: #5b6a7d;
 
   /* — Texto sobre tinta — */
-  --text: #f3ead7;
-  --text-dim: #b3a98f;
-  --text-mute: #847b67;
-  --text-line: rgba(243, 234, 215, 0.14);
+  --text: #e4ecf3;
+  --text-dim: #8a9aae;
+  --text-mute: #5b6a7d;
+  --text-line: rgba(228, 236, 243, 0.14);
 
-  /* — Acento principal (ámbar de linterna de taller) — */
-  --accent: #ff8a1e;
-  --accent-hot: #ffb04a;
-  --accent-deep: #c25a00;
-  --accent-wash: rgba(255, 138, 30, 0.12);
-  --accent-line: rgba(255, 138, 30, 0.35);
+  /* — Acento principal (azul de tablero mecánico) — */
+  --accent: #3b82f6;
+  --accent-hot: #60a5fa;
+  --accent-deep: #1e3a5f;
+  --accent-wash: rgba(59, 130, 246, 0.12);
+  --accent-line: rgba(59, 130, 246, 0.35);
 
   /* — Sellos de estado (atenuados, no neón) — */
-  --stamp-ok: #8fb37a;
-  --stamp-warn: #d49a3a;
+  --stamp-ok: #6ea3c7;
+  --stamp-warn: #5e8fb5;
   --stamp-urgent: #c44a3a;
 
   /* — Radios y curvas — */
@@ -78,12 +78,12 @@ body {
   background-color: var(--ink);
   background-image:
     /* viñeta cálida arriba */
-    radial-gradient(ellipse 120% 60% at 50% -10%, rgba(255, 138, 30, 0.07), transparent 60%),
+    radial-gradient(ellipse 120% 60% at 50% -10%, rgba(59, 130, 246, 0.07), transparent 60%),
     /* halos laterales fríos */
-    radial-gradient(circle at 0% 30%, rgba(255, 138, 30, 0.03), transparent 40%),
-    radial-gradient(circle at 100% 70%, rgba(255, 138, 30, 0.03), transparent 40%),
+    radial-gradient(circle at 0% 30%, rgba(59, 130, 246, 0.03), transparent 40%),
+    radial-gradient(circle at 100% 70%, rgba(59, 130, 246, 0.03), transparent 40%),
     /* grano fino */
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95  0 0 0 0 0.92  0 0 0 0 0.85  0 0 0 0.045 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.89  0 0 0 0 0.92  0 0 0 0 0.95  0 0 0 0.045 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
   background-attachment: fixed;
   background-size: auto, auto, auto, 160px 160px;
 }
@@ -214,26 +214,19 @@ body {
   animation: fadeOut 0.4s var(--t) 0.7s forwards;
 }
 .splash-mark {
-  width: 76px;
-  height: 76px;
-  border: 1.5px solid var(--accent-line);
-  border-radius: 50%;
+  width: 96px;
+  height: 96px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background:
-    radial-gradient(circle at 30% 30%, rgba(255, 138, 30, 0.18), transparent 60%),
-    var(--ink);
   animation: pop 0.6s var(--t);
   position: relative;
+  filter: drop-shadow(0 8px 24px rgba(59, 130, 246, 0.35));
 }
-.splash-mark::after {
-  content: "";
-  position: absolute;
-  inset: 4px;
-  border: 1px solid var(--text-line);
-  border-radius: 50%;
-  pointer-events: none;
+.splash-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 .splash-name {
   font-family: var(--font-poppins), 'Poppins', sans-serif;
@@ -433,7 +426,7 @@ body {
   justify-content: center;
   position: relative;
   background:
-    radial-gradient(circle at 35% 30%, rgba(255, 138, 30, 0.22), transparent 65%),
+    radial-gradient(circle at 35% 30%, rgba(59, 130, 246, 0.22), transparent 65%),
     var(--ink-2);
   border: 1px solid var(--text-line);
   animation: float 4s ease-in-out infinite;
@@ -574,7 +567,7 @@ body {
 .btn-primary {
   background: var(--accent);
   color: var(--ink);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.18) inset, 0 8px 22px rgba(255, 138, 30, 0.28);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.18) inset, 0 8px 22px rgba(59, 130, 246, 0.28);
 }
 .btn-primary:hover { background: var(--accent-hot); }
 .btn-primary::before {
@@ -1070,11 +1063,11 @@ body {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  box-shadow: 0 14px 30px rgba(255, 138, 30, 0.35), 0 2px 6px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 14px 30px rgba(59, 130, 246, 0.35), 0 2px 6px rgba(0, 0, 0, 0.4);
   z-index: 50;
   transition: transform 0.2s var(--t), box-shadow 0.2s, background 0.2s;
 }
-.fab:hover  { background: var(--accent-hot); box-shadow: 0 18px 36px rgba(255, 138, 30, 0.45), 0 2px 8px rgba(0, 0, 0, 0.4); }
+.fab:hover  { background: var(--accent-hot); box-shadow: 0 18px 36px rgba(59, 130, 246, 0.45), 0 2px 8px rgba(0, 0, 0, 0.4); }
 .fab:active { transform: translateX(-50%) scale(0.98); }
 .fab::before {
   content: "";

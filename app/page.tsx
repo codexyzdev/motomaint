@@ -35,44 +35,8 @@ export default function SplashGate() {
     return (
       <div className="splash" role="status" aria-label="Cargando MotoMaint">
         <div className="splash-mark" aria-hidden="true">
-          <svg width="36" height="36" viewBox="0 0 64 64" fill="none">
-            <path
-              d="M16 44l8-20h16l8 20"
-              stroke="url(#splash-gradient)"
-              strokeWidth="2.5"
-              strokeLinejoin="round"
-              fill="none"
-            />
-            <circle
-              cx="20"
-              cy="46"
-              r="6"
-              stroke="url(#splash-gradient)"
-              strokeWidth="2.5"
-              fill="none"
-            />
-            <circle
-              cx="44"
-              cy="46"
-              r="6"
-              stroke="url(#splash-gradient)"
-              strokeWidth="2.5"
-              fill="none"
-            />
-            <path
-              d="M24 24l4-8h8l4 8"
-              stroke="url(#splash-gradient)"
-              strokeWidth="2.5"
-              strokeLinejoin="round"
-              fill="none"
-            />
-            <defs>
-              <linearGradient id="splash-gradient" x1="0" y1="0" x2="64" y2="64">
-                <stop offset="0" stopColor="#ffb04a" />
-                <stop offset="1" stopColor="#ff8a1e" />
-              </linearGradient>
-            </defs>
-          </svg>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.webp" alt="" width={56} height={56} />
         </div>
         <p className="splash-name">MotoMaint</p>
         <span className="splash-tag">Hoja de inspección</span>

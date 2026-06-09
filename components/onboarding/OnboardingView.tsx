@@ -51,8 +51,8 @@ export default function OnboardingView({ onComplete }: OnboardingViewProps) {
           <path d="M24 24l4-8h8l4 8" stroke="url(#onboard-gradient)" strokeWidth="2.5" strokeLinejoin="round" fill="none" />
           <defs>
             <linearGradient id="onboard-gradient" x1="0" y1="0" x2="64" y2="64">
-              <stop offset="0" stopColor="#ffb04a" />
-              <stop offset="1" stopColor="#ff8a1e" />
+              <stop offset="0" stopColor="#60a5fa" />
+              <stop offset="1" stopColor="#3b82f6" />
             </linearGradient>
           </defs>
         </svg>
