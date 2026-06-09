@@ -181,7 +181,7 @@ export default function DashboardView() {
 
         <div className="rule-numbered">
           <span>·</span>
-          <b>02 — Servicios</b>
+          <b>Servicios</b>
           <span>·</span>
         </div>
 
