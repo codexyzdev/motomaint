@@ -226,65 +226,67 @@ export default function SettingsView() {
         <div style={{ width: 40 }} />
       </header>
 
-      <section className="settings-section">
-        <h2>Tu moto</h2>
-        <button className="settings-row" onClick={openEditMoto}>
-          <div className="settings-row-info">
-            <span className="settings-row-title">{moto.marca} {moto.modelo}</span>
-            <span className="settings-row-subtitle">{moto.kmActual.toLocaleString('es-CO')} km</span>
+      <div className="settings-container">
+        <section className="settings-section">
+          <h2>Tu moto</h2>
+          <button className="settings-row" onClick={openEditMoto}>
+            <div className="settings-row-info">
+              <span className="settings-row-title">{moto.marca} {moto.modelo}</span>
+              <span className="settings-row-subtitle">{moto.kmActual.toLocaleString('es-CO')} km</span>
+            </div>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </button>
+        </section>
+
+        <section className="settings-section">
+          <h2>Servicios</h2>
+          <div className="service-list">
+            {services.map((service) => (
+              <ServiceTypeRow
+                key={service.id}
+                service={service}
+                onClick={openEditService}
+              />
+            ))}
           </div>
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d="M9 18l6-6-6-6" />
-          </svg>
-        </button>
-      </section>
+          <button className="btn btn-secondary add-service-btn" onClick={openAddService}>
+            + Agregar servicio personalizado
+          </button>
+        </section>
 
-      <section className="settings-section">
-        <h2>Servicios</h2>
-        <div className="service-list">
-          {services.map((service) => (
-            <ServiceTypeRow
-              key={service.id}
-              service={service}
-              onClick={openEditService}
-            />
-          ))}
-        </div>
-        <button className="btn btn-secondary add-service-btn" onClick={openAddService}>
-          + Agregar servicio personalizado
-        </button>
-      </section>
+        <section className="settings-section">
+          <h2>Backup</h2>
+          <button className="btn btn-secondary" onClick={handleExport}>
+            Exportar datos
+          </button>
+          <button className="btn btn-secondary" onClick={handleImportClick}>
+            Importar datos
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json"
+            style={{ display: 'none' }}
+            onChange={handleImportFile}
+          />
+        </section>
 
-      <section className="settings-section">
-        <h2>Backup</h2>
-        <button className="btn btn-secondary" onClick={handleExport}>
-          Exportar datos
-        </button>
-        <button className="btn btn-secondary" onClick={handleImportClick}>
-          Importar datos
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".json"
-          style={{ display: 'none' }}
-          onChange={handleImportFile}
-        />
-      </section>
-
-      <section className="settings-section danger-zone">
-        <h2>Zona de peligro</h2>
-        <button className="btn btn-danger" onClick={openConfirmReset}>
-          Borrar todo y empezar de cero
-        </button>
-      </section>
+        <section className="settings-section danger-zone">
+          <h2>Zona de peligro</h2>
+          <button className="btn btn-danger" onClick={openConfirmReset}>
+            Borrar todo y empezar de cero
+          </button>
+        </section>
+      </div>
 
       {modalState.type === 'editMoto' && (
         <Modal
