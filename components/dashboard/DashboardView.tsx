@@ -154,7 +154,7 @@ export default function DashboardView() {
         <header className="view-header">
           <div className="view-header-main">
             <div className="view-header-titles">
-              <p className="view-eyebrow">Cuaderno de bitácora</p>
+              <p className="view-eyebrow">Cuaderno de servicio</p>
               <h1 className="view-title">MotoMaint</h1>
             </div>
             <button
