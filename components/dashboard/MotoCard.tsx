@@ -42,12 +42,6 @@ export default function MotoCard({
     onKmUpdated(updated.kmActual);
   }
 
-  const stampText = urgentCount > 0
-    ? `${urgentCount} vencido${urgentCount !== 1 ? 's' : ''}`
-    : warningCount > 0
-      ? `${warningCount} por vencer`
-      : 'Todo en orden';
-
   return (
     <article className="moto-card anim-rise">
       <header className="moto-card-head">
@@ -65,7 +59,6 @@ export default function MotoCard({
             </button>
           </h2>
         </div>
-        <span className="moto-status-pill">{stampText}</span>
       </header>
 
       <div className="odometer">
