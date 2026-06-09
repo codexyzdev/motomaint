@@ -417,12 +417,6 @@ body {
   letter-spacing: 0.32em;
   text-transform: uppercase;
 }
-.rule-numbered::before, .rule-numbered::after {
-  content: "";
-  height: 1px;
-  background: var(--text-line);
-}
-.rule-numbered::after { background-image: linear-gradient(to right, var(--text-line) 0 4px, transparent 4px 8px); background-size: 8px 1px; }
 .rule-numbered b {
   color: var(--accent);
   font-weight: 500;
