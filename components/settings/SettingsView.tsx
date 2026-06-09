@@ -193,8 +193,8 @@ export default function SettingsView() {
 
   return (
     <div className="settings">
-      <header className="view-header">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <header className="view-header view-header--with-back">
+        <div className="view-header-main">
           <button
             className="icon-btn"
             onClick={() => router.back()}
@@ -205,7 +205,7 @@ export default function SettingsView() {
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
           </button>
-          <div>
+          <div className="view-header-titles">
             <p className="view-eyebrow">Cuaderno · Configuración</p>
             <h1 className="view-title">Ajustes</h1>
           </div>
