@@ -10,7 +10,7 @@ The implementation follows the architecture defined in the design document, buil
 
 ## Tasks
 
-- [ ] 1. Configure project foundation and testing infrastructure
+- [x] 1. Configure project foundation and testing infrastructure
   - Install pinned dev dependencies: `vitest@2.1.9`, `fast-check@3.22.0`, `@vitest/coverage-v8@2.1.9`, `@testing-library/react@16.1.0`, `@testing-library/jest-dom@6.6.3`, `jsdom@25.0.1`
   - Add `vitest.config.ts` with jsdom environment, setup file, and path aliases matching `tsconfig.json`
   - Add `__tests__/setup.ts` with a localStorage mock (`vi.stubGlobal`) that resets between tests
@@ -18,14 +18,14 @@ The implementation follows the architecture defined in the design document, buil
   - Add `test` and `test:coverage` scripts to `package.json`
   - _Requirements: 18.6_
 
-- [ ] 2. Define shared TypeScript types
-  - [ ] 2.1 Create `lib/types.ts` with all exported interfaces: `Moto`, `TipoServicio`, `Registro`, `Ajustes`, `ServicioCalculado`, `ToastType`, `StorageAdapter`, `BackupPayload`
+- [x] 2. Define shared TypeScript types
+  - [x] 2.1 Create `lib/types.ts` with all exported interfaces: `Moto`, `TipoServicio`, `Registro`, `Ajustes`, `ServicioCalculado`, `ToastType`, `StorageAdapter`, `BackupPayload`
     - Types must match the exact field names and types specified in the design document
     - `ServicioCalculado` extends `TipoServicio` with the computed fields from the design
     - _Requirements: 18.1, 18.2, 18.3, 18.4, 18.5_
 
-- [ ] 3. Implement the Storage layer
-  - [ ] 3.1 Create `lib/storage.ts` implementing the `StorageAdapter` interface with the `motomaint:` prefix
+- [x] 3. Implement the Storage layer
+  - [x] 3.1 Create `lib/storage.ts` implementing the `StorageAdapter` interface with the `motomaint:` prefix
     - Implement `get`, `set`, `remove`, `getAll`, `clear` as async methods
     - `get` catches all errors, logs with `console.error`, and returns `null`
     - `set`, `remove`, `getAll`, `clear` log and rethrow on error
@@ -55,10 +55,10 @@ The implementation follows the architecture defined in the design document, buil
     - Stub `localStorage.setItem` to throw; assert `set` rethrows
     - _Requirements: 1.6, 1.7_
 
-- [ ] 4. Checkpoint — storage layer
+- [x] 4. Checkpoint — storage layer
   - Run `pnpm test --run` and confirm all storage tests pass; run `pnpm build` to confirm zero TypeScript errors. Ask the user if anything needs clarification before continuing.
 
-- [ ] 5. Implement the Data layer
+- [x] 5. Implement the Data layer
   - [ ] 5.1 Create `lib/data.ts` with the `DEFAULT_SERVICES` array (8 built-in services) and all domain methods on the exported `data` object
     - Implement `getMoto`, `saveMoto`, `updateKm` (clamp to `Math.max(0, parseInt(v) || 0)`, throw if no moto)
     - Implement `getServices` (initialize and persist defaults when storage is empty/null/length 0), `saveServices`, `addService` (ID format `svc_<timestamp>_<random>`), `updateService`, `removeService`
@@ -93,11 +93,11 @@ The implementation follows the architecture defined in the design document, buil
     - `exportAll` returns correct `{ version: 1, exportedAt, moto, services, history, settings }` shape
     - _Requirements: 2.6, 2.8, 2.10_
 
-- [ ] 6. Checkpoint — data layer
+- [x] 6. Checkpoint — data layer
   - Run `pnpm test --run` and confirm all data tests pass. Ask the user if any data behaviors need adjustment.
 
-- [ ] 7. Implement the Calculation Engine
-  - [ ] 7.1 Create `lib/engine.ts` with `computeServicesStatus`, `formatServiceStatus`, and `getMainProgress`
+- [x] 7. Implement the Calculation Engine
+  - [x] 7.1 Create `lib/engine.ts` with `computeServicesStatus`, `formatServiceStatus`, and `getMainProgress`
     - `computeServicesStatus`: fetch moto, services, history in parallel; filter to `enabled`; compute `kmSinceLast`, `kmRemaining`, `kmProgress`, `daysSinceLast`, `daysRemaining`, `daysProgress`, and `status` per the rules in the design
     - No-history fallback: km > 0 → use km as `kmSinceLast`; days → `daysRemaining = intervalDays`, `daysProgress = 0`
     - `urgent` when any `remaining <= 0`; `warning` when any `progress >= 0.85` and not urgent; else `ok`
@@ -137,12 +137,12 @@ The implementation follows the architecture defined in the design document, buil
     - `getMainProgress` returns 0 for unconfigured service
     - _Requirements: 3.4, 3.9, 3.10_
 
-- [ ] 8. Create the icon catalogue
-  - [ ] 8.1 Create `lib/icons.ts` exporting the `ICONS` array of 32 emojis matching the original catalogue
+- [x] 8. Create the icon catalogue
+  - [x] 8.1 Create `lib/icons.ts` exporting the `ICONS` array of 32 emojis matching the original catalogue
     - _Requirements: 12.8_
 
-- [ ] 9. Implement formatting helpers
-  - [ ] 9.1 Create `lib/helpers.ts` with `formatDate(iso: string): string` and `formatNumber(n: number): string`
+- [x] 9. Implement formatting helpers
+  - [x] 9.1 Create `lib/helpers.ts` with `formatDate(iso: string): string` and `formatNumber(n: number): string`
     - `formatDate`: return `'Hoy'`, `'Ayer'`, `'Hace N días'` (N in [2–6]), or locale date string; return `''` for invalid ISO input
     - `formatNumber`: use `Intl.NumberFormat` with locale `es-CO` and thousand separators
     - _Requirements: 15.9, 15.10, 15.11, 15.12, 15.13_
@@ -160,40 +160,40 @@ The implementation follows the architecture defined in the design document, buil
     - `formatNumber(1000)` returns `'1.000'` (es-CO separator)
     - _Requirements: 15.10, 15.11, 15.13_
 
-- [ ] 10. Checkpoint — business logic
+- [x] 10. Checkpoint — business logic
   - Run `pnpm test --run` and confirm all lib tests pass; run `tsc --noEmit` to confirm zero errors. Ask the user before proceeding to UI.
 
-- [ ] 11. Implement global styles and theme
-  - [ ] 11.1 Replace `app/globals.css` with the full theme: Tailwind v4 import, `:root` CSS custom properties (`--bg`, `--primary`, etc.), all six keyframe animations (`fadeIn`, `fadeOut`, `slideIn`, `slideUp`, `pop`, `float`, `pulse`), base reset, and utility classes from the original `styles.css`
+- [x] 11. Implement global styles and theme
+  - [x] 11.1 Replace `app/globals.css` with the full theme: Tailwind v4 import, `:root` CSS custom properties (`--bg`, `--primary`, etc.), all six keyframe animations (`fadeIn`, `fadeOut`, `slideIn`, `slideUp`, `pop`, `float`, `pulse`), base reset, and utility classes from the original `styles.css`
     - Include `env(safe-area-inset-bottom)` safe area rules
     - Include radial gradient background on `body`
     - Mobile-first layout with max-width 480px centered
     - _Requirements: 16.1, 16.3, 16.4, 16.5, 16.6, 16.7_
 
-- [ ] 12. Implement the root layout
-  - [ ] 12.1 Update `app/layout.tsx` to load `Inter` and `Space Grotesk` from `next/font/google`, apply them as CSS variables, add the PWA meta tags (`viewport` with `viewport-fit=cover`, `apple-mobile-web-app-capable`), and wrap children with `ToastProvider` and a root React Error Boundary
+- [x] 12. Implement the root layout
+  - [x] 12.1 Update `app/layout.tsx` to load `Inter` and `Space Grotesk` from `next/font/google`, apply them as CSS variables, add the PWA meta tags (`viewport` with `viewport-fit=cover`, `apple-mobile-web-app-capable`), and wrap children with `ToastProvider` and a root React Error Boundary
     - _Requirements: 16.2, 17.3, 17.4_
 
-- [ ] 13. Implement the PWA manifest
-  - [ ] 13.1 Create `app/manifest.ts` (Next.js metadata API) or `public/manifest.json` with `name: "MotoMaint"`, `display: "standalone"`, `background_color: "#0f1115"`, `theme_color: "#0f1115"`, and icon references
+- [x] 13. Implement the PWA manifest
+  - [x] 13.1 Create `app/manifest.ts` (Next.js metadata API) or `public/manifest.json` with `name: "MotoMaint"`, `display: "standalone"`, `background_color: "#0f1115"`, `theme_color: "#0f1115"`, and icon references
     - _Requirements: 17.1_
 
-- [ ] 14. Implement UI primitives (Toast, Modal, ConfirmDialog)
-  - [ ] 14.1 Create `components/ui/useToast.ts` with `ToastContext`, `ToastProvider`, and `useToast` hook
+- [x] 14. Implement UI primitives (Toast, Modal, ConfirmDialog)
+  - [x] 14.1 Create `components/ui/useToast.ts` with `ToastContext`, `ToastProvider`, and `useToast` hook
     - `showToast(message, type?, duration?)`: truncate message to 120 chars, clamp duration to [500, 10000] ms, default 2500 ms
     - Replacing a visible toast resets the timer
     - _Requirements: 15.1, 15.2, 15.3, 15.4_
 
-  - [ ] 14.2 Create `components/ui/Toast.tsx` that reads `useToast` context and renders the fixed-position toast element
+  - [x] 14.2 Create `components/ui/Toast.tsx` that reads `useToast` context and renders the fixed-position toast element
     - Position: `bottom: 100px`, z-index 200; applies `show`, `success`, `danger` CSS classes matching original styles
     - _Requirements: 15.2, 15.3_
 
-  - [ ] 14.3 Create `components/ui/Modal.tsx` as a bottom-sheet modal using a React Portal
+  - [x] 14.3 Create `components/ui/Modal.tsx` as a bottom-sheet modal using a React Portal
     - Accepts `title`, `subtitle?`, `children`, `actions?` (max 4), `onClose`
     - `slideUp` animation (300 ms); backdrop click calls `onClose`; sets `body overflow: hidden` while open
     - _Requirements: 15.5, 15.6, 15.7_
 
-  - [ ] 14.4 Create `components/ui/ConfirmDialog.tsx` wrapping `Modal` with confirm/cancel actions
+  - [x] 14.4 Create `components/ui/ConfirmDialog.tsx` wrapping `Modal` with confirm/cancel actions
     - Props: `title`, `message`, `confirmLabel?`, `cancelLabel?`, `danger?`, `onConfirm`, `onCancel`
     - _Requirements: 15.8_
 
@@ -204,8 +204,8 @@ The implementation follows the architecture defined in the design document, buil
     - ConfirmDialog confirm button → `onConfirm` called
     - _Requirements: 15.2, 15.4, 15.7_
 
-- [ ] 15. Implement the Onboarding view
-  - [ ] 15.1 Create `components/onboarding/OnboardingView.tsx` as a client component
+- [x] 15. Implement the Onboarding view
+  - [x] 15.1 Create `components/onboarding/OnboardingView.tsx` as a client component
     - Controlled form with `marca` (max 50 chars), `modelo` (max 50 chars), `kmActual` (min 0, max 999999)
     - Submit: trim and validate; on empty marca/modelo show danger toast `'Marca y modelo son requeridos'` without navigating; on success call `data.saveMoto`, show success toast, invoke `onComplete` callback
     - Floating motorcycle SVG with `animation: float 3s ease-in-out infinite`
@@ -219,15 +219,15 @@ The implementation follows the architecture defined in the design document, buil
     - _Requirements: 5.2, 5.3, 5.4_
 
 - [ ] 16. Implement the SplashGate and root page
-  - [ ] 16.1 Replace `app/page.tsx` with a `SplashGate` client component
+  - [x] 16.1 Replace `app/page.tsx` with a `SplashGate` client component
     - On mount: start 600 ms timer and call `data.getMoto()` in parallel
     - Show splash screen (logo + animation) while `view === null`
     - After both resolve: if moto exists render `DashboardView`, else render `OnboardingView`
     - Pass `onComplete` callback to `OnboardingView` to transition directly to `DashboardView` without page reload
     - _Requirements: 4.1, 4.2, 4.3, 4.7, 4.8_
 
-- [ ] 17. Implement the Dashboard — MotoCard and alert banner
-  - [ ] 17.1 Create `components/dashboard/MotoCard.tsx`
+- [x] 17. Implement the Dashboard — MotoCard and alert banner
+  - [x] 17.1 Create `components/dashboard/MotoCard.tsx`
     - Display moto name (marca + modelo), current km, quick-adjust buttons (`−100`, `+100`, `+500`, `Editar`)
     - Quick-adjust calls `data.updateKm` and updates parent state in ≤100 ms; clamps to 0 for negative results
     - Edit-km button opens km modal; edit-name icon opens moto modal
@@ -235,22 +235,22 @@ The implementation follows the architecture defined in the design document, buil
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8_
 
 - [ ] 18. Implement the Dashboard — ServiceCard, HistoryItem, ServiceTabs, FAB
-  - [ ] 18.1 Create `components/dashboard/ServiceCard.tsx`
+  - [x] 18.1 Create `components/dashboard/ServiceCard.tsx`
     - Render icon, name, status text, progress bar (red/yellow/orange by status), check button
     - Card click (outside check button) opens service-detail modal; check button opens record modal
     - _Requirements: 8.1, 8.2, 8.3, 8.4_
 
-  - [ ] 18.2 Create `components/dashboard/HistoryItem.tsx`
+  - [x] 18.2 Create `components/dashboard/HistoryItem.tsx`
     - Render service icon, service name, km, relative date (`formatDate`), notes (if present)
     - Delete button shows `ConfirmDialog` before removing record
     - _Requirements: 9.1, 9.2, 9.3_
 
-  - [ ] 18.3 Create `components/dashboard/ServiceTabs.tsx`
+  - [x] 18.3 Create `components/dashboard/ServiceTabs.tsx`
     - Two tabs: `Servicios` and `Historial`; `Servicios` active by default
     - Empty states: `'No hay servicios configurados. Ve a Ajustes para agregar.'` and `'Sin mantenimientos registrados aún. ¡Registra el primero!'`
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6_
 
-  - [ ] 18.4 Create `components/dashboard/FAB.tsx`
+  - [x] 18.4 Create `components/dashboard/FAB.tsx`
     - Show text `Registrar mantenimiento` on screens > 480px; show only `+` icon on ≤480px
     - _Requirements: 10.1_
 
