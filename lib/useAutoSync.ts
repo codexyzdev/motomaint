@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { getAuthState, getValidAccessToken } from './googleAuth';
 import { uploadBackup } from './googleDrive';
 import { data } from './data';
 import { onDataChanged } from './dataEvents';
+import { emitSyncCompleted } from './syncEvents';
 
 const SYNC_DELAY = 3000;
 const STORAGE_KEY = 'motomaint_last_sync';
@@ -18,13 +19,15 @@ interface UseAutoSyncReturn {
 export function useAutoSync(): UseAutoSyncReturn {
   const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isSyncingRef = useRef(false);
-  const lastSyncDateRef = useRef<string | null>(null);
+  const [lastSyncDate, setLastSyncDate] = useState<string | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const syncNow = useCallback(async () => {
     const state = getAuthState();
     if (!state.isAuthenticated || isSyncingRef.current) return;
 
     isSyncingRef.current = true;
+    setIsSyncing(true);
     try {
       const token = await getValidAccessToken();
       if (!token) return;
@@ -32,13 +35,16 @@ export function useAutoSync(): UseAutoSyncReturn {
       const payload = await data.exportAll();
       const result = await uploadBackup(payload);
       if (result.success) {
-        lastSyncDateRef.current = new Date().toLocaleString('es-CO');
-        localStorage.setItem(STORAGE_KEY, lastSyncDateRef.current);
+        const syncTime = new Date().toLocaleString('es-CO');
+        setLastSyncDate(syncTime);
+        localStorage.setItem(STORAGE_KEY, syncTime);
+        emitSyncCompleted({ success: true, modifiedTime: result.modifiedTime });
       }
     } catch (error) {
       console.error('Sync failed:', error);
     } finally {
       isSyncingRef.current = false;
+      setIsSyncing(false);
     }
   }, []);
 
@@ -54,7 +60,7 @@ export function useAutoSync(): UseAutoSyncReturn {
   useEffect(() => {
     const savedDate = localStorage.getItem(STORAGE_KEY);
     if (savedDate) {
-      lastSyncDateRef.current = savedDate;
+      setLastSyncDate(savedDate);
     }
   }, []);
 
@@ -95,8 +101,8 @@ export function useAutoSync(): UseAutoSyncReturn {
   }, [syncNow]);
 
   return {
-    lastSyncDate: lastSyncDateRef.current,
-    isSyncing: isSyncingRef.current,
+    lastSyncDate,
+    isSyncing,
     syncNow,
   };
 }

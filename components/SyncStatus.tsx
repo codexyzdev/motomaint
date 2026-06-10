@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getAuthState, getValidAccessToken, clearTokens, revokeGoogleAccess } from '@/lib/googleAuth';
 import { subscribeAuthChange } from '@/lib/authEvents';
+import { onSyncCompleted } from '@/lib/syncEvents';
 import { uploadBackup, downloadBackup, getLastBackupInfo } from '@/lib/googleDrive';
 import { data } from '@/lib/data';
 import { useToast } from '@/components/ui/useToast';
@@ -35,6 +36,12 @@ export function SyncStatus({ onStateChange }: SyncStatusProps) {
       onStateChange?.(authenticated);
     });
 
+    const unsubscribeSync = onSyncCompleted((detail) => {
+      if (detail.success) {
+        setLastSync(new Date().toLocaleString('es-CO'));
+      }
+    });
+
     const loadLastSync = async () => {
       try {
         const info = await getLastBackupInfo();
@@ -48,7 +55,7 @@ export function SyncStatus({ onStateChange }: SyncStatusProps) {
 
     loadLastSync();
 
-    return () => { unsubscribe(); };
+    return () => { unsubscribe(); unsubscribeSync(); };
   }, [onStateChange]);
 
   const handleSync = useCallback(async () => {

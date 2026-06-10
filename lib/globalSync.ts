@@ -2,6 +2,7 @@ import { getAuthState, getValidAccessToken } from './googleAuth';
 import { uploadBackup } from './googleDrive';
 import { data } from './data';
 import { onDataChanged } from './dataEvents';
+import { emitSyncCompleted } from './syncEvents';
 
 const SYNC_DELAY = 3000;
 let syncTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -27,9 +28,13 @@ async function performSync() {
     const result = await uploadBackup(payload);
     if (result.success) {
       console.log('[AutoSync] Backup uploaded successfully');
+      emitSyncCompleted({ success: true, modifiedTime: result.modifiedTime });
+    } else {
+      emitSyncCompleted({ success: false, error: 'Upload failed' });
     }
   } catch (error) {
     console.error('[AutoSync] Failed:', error);
+    emitSyncCompleted({ success: false, error: String(error) });
   }
 }
 

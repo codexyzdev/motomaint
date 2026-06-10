@@ -1,9 +1,10 @@
 'use client';
 
-import { createContext, useContext, useEffect, useRef, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useCallback, useState, ReactNode } from 'react';
 import { getAuthState, getValidAccessToken } from '@/lib/googleAuth';
 import { uploadBackup, downloadBackup } from '@/lib/googleDrive';
 import { data } from '@/lib/data';
+import { emitSyncCompleted } from '@/lib/syncEvents';
 import type { BackupPayload } from '@/lib/types';
 
 interface AutoSyncContextValue {
@@ -32,12 +33,16 @@ export function AutoSyncProvider({ children }: AutoSyncProviderProps) {
   const lastBackupDateRef = useRef<string | null>(null);
   const isSyncingRef = useRef(false);
   const hasBackupRef = useRef(false);
+  const [lastBackupDate, setLastBackupDate] = useState<string | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [hasBackup, setHasBackup] = useState(false);
 
   const syncNow = useCallback(async () => {
     const state = getAuthState();
     if (!state.isAuthenticated || isSyncingRef.current) return;
 
     isSyncingRef.current = true;
+    setIsSyncing(true);
     try {
       const token = await getValidAccessToken();
       if (!token) return;
@@ -45,13 +50,16 @@ export function AutoSyncProvider({ children }: AutoSyncProviderProps) {
       const payload = await data.exportAll();
       const result = await uploadBackup(payload);
       if (result.success && result.modifiedTime) {
-        lastBackupDateRef.current = new Date(result.modifiedTime).toLocaleString('es-CO');
-        hasBackupRef.current = true;
+        const syncTime = new Date(result.modifiedTime).toLocaleString('es-CO');
+        setLastBackupDate(syncTime);
+        setHasBackup(true);
+        emitSyncCompleted({ success: true, modifiedTime: result.modifiedTime });
       }
     } catch (error) {
       console.error('Auto sync failed:', error);
     } finally {
       isSyncingRef.current = false;
+      setIsSyncing(false);
     }
   }, []);
 
@@ -68,11 +76,11 @@ export function AutoSyncProvider({ children }: AutoSyncProviderProps) {
         const localData = await data.exportAll();
 
         if (driveData) {
-          hasBackupRef.current = true;
-          lastBackupDateRef.current = new Date(driveData.exportedAt).toLocaleString('es-CO');
+          setHasBackup(true);
+          setLastBackupDate(new Date(driveData.exportedAt).toLocaleString('es-CO'));
 
           if (new Date(driveData.exportedAt) > new Date(localData.exportedAt)) {
-            hasBackupRef.current = true;
+            setHasBackup(true);
           }
         }
       } catch (error) {
@@ -86,9 +94,9 @@ export function AutoSyncProvider({ children }: AutoSyncProviderProps) {
   return (
     <AutoSyncContext.Provider
       value={{
-        lastBackupDate: lastBackupDateRef.current,
-        isSyncing: isSyncingRef.current,
-        hasBackup: hasBackupRef.current,
+        lastBackupDate,
+        isSyncing,
+        hasBackup,
         triggerSync: syncNow,
       }}
     >
