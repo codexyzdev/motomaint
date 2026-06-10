@@ -49,7 +49,7 @@ export default function MotoCard({
     <article className="moto-card anim-rise">
       <header className="moto-card-head">
         <div>
-          <p className="moto-eyebrow">Vehículo · Ficha 01</p>
+          <p className="moto-eyebrow">Vehículo</p>
           <h2 className="moto-name">
             <span>
               {moto.marca} <span style={{ color: 'var(--text-mute)', fontWeight: 400 }}>{moto.modelo}</span>
