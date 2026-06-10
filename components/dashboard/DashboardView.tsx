@@ -243,7 +243,7 @@ export default function DashboardView() {
         <Modal
           eyebrow="Sec. 02 · Registro"
           title="¿Qué mantuviste?"
-          subtitle="Elige el servicio que acabas de realizar. Lo sellaremos en tu bitácora."
+          subtitle="Elige el servicio que acabas de realizar. Lo sellaremos en tu Cuaderno."
           folio="F-02A"
           onClose={closeModal}
         >

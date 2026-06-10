@@ -37,34 +37,21 @@ export default function OnboardingView({ onComplete }: OnboardingViewProps) {
 
   return (
     <div className="onboarding">
+      <header className="view-header">
+        <div className="view-header-main">
+          <div className="view-header-titles">
+            <p className="view-eyebrow">Folio · 000 — Inicio</p>
+            <h1 className="view-title">MotoMaint</h1>
+          </div>
+        </div>
+      </header>
+
       <div className="onboarding-illu" aria-hidden="true">
-        <svg width="68" height="68" viewBox="0 0 64 64" fill="none">
-          <path
-            d="M16 44l8-20h16l8 20"
-            stroke="url(#onboard-gradient)"
-            strokeWidth="2.5"
-            strokeLinejoin="round"
-            fill="none"
-          />
-          <circle cx="20" cy="46" r="6" stroke="url(#onboard-gradient)" strokeWidth="2.5" fill="none" />
-          <circle cx="44" cy="46" r="6" stroke="url(#onboard-gradient)" strokeWidth="2.5" fill="none" />
-          <path d="M24 24l4-8h8l4 8" stroke="url(#onboard-gradient)" strokeWidth="2.5" strokeLinejoin="round" fill="none" />
-          <defs>
-            <linearGradient id="onboard-gradient" x1="0" y1="0" x2="64" y2="64">
-              <stop offset="0" stopColor="#60a5fa" />
-              <stop offset="1" stopColor="#3b82f6" />
-            </linearGradient>
-          </defs>
-        </svg>
+        <img src="/logo.webp" alt="" width={72} height={72} />
       </div>
 
-      <p className="view-eyebrow" style={{ marginBottom: 14 }}>Folio · 000 — Inicio</p>
-      <h1>
-        Tu moto,<br />
-        <span className="accent">bien cuidada.</span>
-      </h1>
       <p className="onboarding-lead">
-        Una bitácora de inspección para que cada cambio de aceite, calibración y revisión quede
+        Una Cuaderno de inspección para que cada cambio de aceite, calibración y revisión quede
         sellado en su página.
       </p>
 
@@ -126,7 +113,7 @@ export default function OnboardingView({ onComplete }: OnboardingViewProps) {
         </div>
 
         <button type="submit" className="btn btn-primary" style={{ marginTop: 12 }}>
-          Comenzar bitácora <span aria-hidden="true">→</span>
+          Comenzar Cuaderno <span aria-hidden="true">→</span>
         </button>
       </form>
     </div>
