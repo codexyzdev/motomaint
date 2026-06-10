@@ -102,16 +102,8 @@ body { overflow-x: clip; }
 /* ============ FONDO EDITORIAL ============ */
 body {
   background-color: var(--ink);
-  background-image:
-    /* viñeta cálida arriba */
-    radial-gradient(ellipse 120% 60% at 50% -10%, rgba(59, 130, 246, 0.07), transparent 60%),
-    /* halos laterales fríos */
-    radial-gradient(circle at 0% 30%, rgba(59, 130, 246, 0.03), transparent 40%),
-    radial-gradient(circle at 100% 70%, rgba(59, 130, 246, 0.03), transparent 40%),
-    /* grano fino */
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.89  0 0 0 0 0.92  0 0 0 0 0.95  0 0 0 0.045 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-  background-attachment: fixed;
-  background-size: auto, auto, auto, 160px 160px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.89  0 0 0 0 0.92  0 0 0 0 0.95  0 0 0 0.045 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: 160px 160px;
 }
 
 ::selection { background: var(--accent); color: var(--ink); }
