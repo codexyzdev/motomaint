@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: '/api/',
     },
-    sitemap: 'https://motomaint.app/sitemap.xml',
+    sitemap: 'https://motomaint.vercel.app/sitemap.xml',
   };
 }

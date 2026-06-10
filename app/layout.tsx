@@ -41,11 +41,11 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'es_CO',
-    url: 'https://motomaint.app',
+    url: 'https://motomaint.vercel.app',
     siteName: 'MotoMaint',
     title: 'MotoMaint - Cuaderno de Inspección de Motocicleta',
     description: 'Registra y rastrea el mantenimiento de tu motocicleta',
- },
+  },
 };
 
 export const viewport: Viewport = {
@@ -79,7 +79,7 @@ export default function RootLayout({
           '@type': 'ListItem',
           position: 1,
           name: 'Home',
-          item: 'https://motomaint.app',
+          item: 'https://motomaint.vercel.app',
         },
       ],
     },
