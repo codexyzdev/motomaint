@@ -319,7 +319,7 @@ export default function SettingsView() {
           </div>
 
           <div className="form-group">
-            <label>Icono</label>
+            <label htmlFor="icon-picker">Icono</label>
             <IconPicker selected={editServiceIcon} onSelect={setEditServiceIcon} />
           </div>
 

@@ -9,7 +9,7 @@ interface IconPickerProps {
 
 export default function IconPicker({ selected, onSelect }: IconPickerProps) {
   return (
-    <div className="icon-picker">
+    <div className="icon-picker" id="icon-picker" role="group" aria-label="Selecciona un icono">
       {ICONS.map((icon) => (
         <button
           key={icon}

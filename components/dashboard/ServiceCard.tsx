@@ -30,7 +30,7 @@ export default function ServiceCard({
   }
 
   return (
-    <article
+    <div
       className={`service-card ${service.status}`}
       onClick={() => onCardClick(service)}
       role="button"
@@ -70,6 +70,6 @@ export default function ServiceCard({
           <polyline points="20 6 9 17 4 12" />
         </svg>
       </button>
-    </article>
+    </div>
   );
 }
