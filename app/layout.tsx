@@ -4,6 +4,7 @@ import { ThemeProvider } from 'next-themes';
 import './globals.css';
 import { ToastProvider } from '@/components/ui/useToast';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
+import { ServiceWorkerRegister } from '@/components/ServiceWorkerRegister';
 
 const poppins = Poppins({
   variable: '--font-poppins',
@@ -96,6 +97,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        <ServiceWorkerRegister />
         <ErrorBoundary>
           <ThemeProvider attribute="data-theme" defaultTheme="dark" enableSystem>
             <ToastProvider>{children}</ToastProvider>
