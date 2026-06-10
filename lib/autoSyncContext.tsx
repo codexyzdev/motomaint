@@ -30,6 +30,7 @@ interface AutoSyncProviderProps {
 
 export function AutoSyncProvider({ children }: AutoSyncProviderProps) {
   const isSyncingRef = useRef(false);
+  const checkedRef = useRef(false);
   const [lastBackupDate, setLastBackupDate] = useState<string | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [hasBackup, setHasBackup] = useState(false);
@@ -62,6 +63,9 @@ export function AutoSyncProvider({ children }: AutoSyncProviderProps) {
 
   useEffect(() => {
     const checkAndRestore = async () => {
+      if (checkedRef.current) return;
+      checkedRef.current = true;
+
       const state = getAuthState();
       if (!state.isAuthenticated) return;
 
@@ -81,7 +85,7 @@ export function AutoSyncProvider({ children }: AutoSyncProviderProps) {
           window.dispatchEvent(new CustomEvent('motomaint:restored-from-drive', {
             detail: { date: driveData.exportedAt }
           }));
-          window.location.reload();
+          window.location.href = window.location.href;
         }
       } catch (error) {
         console.error('Check backup failed:', error);
