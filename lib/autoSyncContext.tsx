@@ -5,7 +5,6 @@ import { getAuthState, getValidAccessToken } from '@/lib/googleAuth';
 import { uploadBackup, downloadBackup } from '@/lib/googleDrive';
 import { data } from '@/lib/data';
 import { emitSyncCompleted } from '@/lib/syncEvents';
-import type { BackupPayload } from '@/lib/types';
 
 interface AutoSyncContextValue {
   lastBackupDate: string | null;
@@ -30,9 +29,7 @@ interface AutoSyncProviderProps {
 }
 
 export function AutoSyncProvider({ children }: AutoSyncProviderProps) {
-  const lastBackupDateRef = useRef<string | null>(null);
   const isSyncingRef = useRef(false);
-  const hasBackupRef = useRef(false);
   const [lastBackupDate, setLastBackupDate] = useState<string | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [hasBackup, setHasBackup] = useState(false);
@@ -64,7 +61,7 @@ export function AutoSyncProvider({ children }: AutoSyncProviderProps) {
   }, []);
 
   useEffect(() => {
-    const checkAndSync = async () => {
+    const checkAndRestore = async () => {
       const state = getAuthState();
       if (!state.isAuthenticated) return;
 
@@ -73,22 +70,25 @@ export function AutoSyncProvider({ children }: AutoSyncProviderProps) {
         if (!token) return;
 
         const driveData = await downloadBackup();
+        if (!driveData) return;
+
         const localData = await data.exportAll();
+        setHasBackup(true);
+        setLastBackupDate(new Date(driveData.exportedAt).toLocaleString('es-CO'));
 
-        if (driveData) {
-          setHasBackup(true);
-          setLastBackupDate(new Date(driveData.exportedAt).toLocaleString('es-CO'));
-
-          if (new Date(driveData.exportedAt) > new Date(localData.exportedAt)) {
-            setHasBackup(true);
-          }
+        if (new Date(driveData.exportedAt) > new Date(localData.exportedAt)) {
+          await data.importAll(driveData);
+          window.dispatchEvent(new CustomEvent('motomaint:restored-from-drive', {
+            detail: { date: driveData.exportedAt }
+          }));
+          window.location.reload();
         }
       } catch (error) {
         console.error('Check backup failed:', error);
       }
     };
 
-    checkAndSync();
+    checkAndRestore();
   }, []);
 
   return (
