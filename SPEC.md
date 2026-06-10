@@ -306,9 +306,9 @@ export function SyncStatus() {
 
 ## Open Questions
 
-1. ¿Quieres sync automático en cada cambio o solo cuando el usuario presiona un botón?
-2. ¿Necesitas que los datos sean encriptados antes de subir a Drive?
-3. ¿Prefieres mostrar el estado de sync en Settings o en el Dashboard?
+~~1. ¿Quieres sync automático en cada cambio o solo cuando el usuario presiona un botón?~~ → **Automático en cada cambio**
+~~2. ¿Necesitas que los datos sean encriptados antes de subir a Drive?~~ → **No, los datos están en el Drive privado del usuario**
+~~3. ¿Prefieres mostrar el estado de sync en Settings o en el Dashboard?~~ → **Settings**
 
 ## Success Criteria
 
