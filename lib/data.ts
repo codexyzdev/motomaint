@@ -9,6 +9,7 @@
  */
 
 import { storage } from './storage';
+import { emitDataChanged } from './dataEvents';
 import type { Moto, TipoServicio, Registro, Ajustes, BackupPayload } from './types';
 
 // ============ Claves de almacenamiento ============
@@ -54,6 +55,7 @@ export const data = {
       updatedAt: new Date().toISOString(),
     };
     await storage.set<Moto>(KEYS.MOTO, merged);
+    emitDataChanged();
     return merged;
   },
 
@@ -66,6 +68,7 @@ export const data = {
       updatedAt: new Date().toISOString(),
     };
     await storage.set<Moto>(KEYS.MOTO, updated);
+    emitDataChanged();
     return updated;
   },
 
@@ -82,6 +85,7 @@ export const data = {
 
   async saveServices(services: TipoServicio[]): Promise<TipoServicio[]> {
     await storage.set<TipoServicio[]>(KEYS.SERVICES, services);
+    emitDataChanged();
     return services;
   },
 
@@ -93,6 +97,7 @@ export const data = {
     };
     services.push(newService);
     await this.saveServices(services);
+    emitDataChanged();
     return newService;
   },
 
@@ -127,6 +132,7 @@ export const data = {
     };
     history.unshift(newRecord); // más reciente primero
     await storage.set<Registro[]>(KEYS.HISTORY, history);
+    emitDataChanged();
     return newRecord;
   },
 
@@ -134,6 +140,7 @@ export const data = {
     const history = await this.getHistory();
     const filtered = history.filter(r => r.id !== id);
     await storage.set<Registro[]>(KEYS.HISTORY, filtered);
+    emitDataChanged();
     return filtered;
   },
 
@@ -150,6 +157,7 @@ export const data = {
 
   async saveSettings(settings: Ajustes): Promise<Ajustes> {
     await storage.set<Ajustes>(KEYS.SETTINGS, settings);
+    emitDataChanged();
     return settings;
   },
 
@@ -157,6 +165,7 @@ export const data = {
 
   async reset(): Promise<void> {
     await storage.clear();
+    emitDataChanged();
   },
 
   // --- EXPORTAR (backup) ---
