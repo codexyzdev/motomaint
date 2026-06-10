@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { initGoogleAuth, exchangeCodeForTokens, saveTokens, getAuthState } from '@/lib/googleAuth';
+import { subscribeAuthChange } from '@/lib/authEvents';
 import { useToast } from '@/components/ui/useToast';
 
 interface GoogleLoginButtonProps {
@@ -13,6 +14,7 @@ export function GoogleLoginButton({ onAuthenticated }: GoogleLoginButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const processingRef = useRef(false);
 
   useEffect(() => {
     const checkAuth = () => {
@@ -27,40 +29,51 @@ export function GoogleLoginButton({ onAuthenticated }: GoogleLoginButtonProps) {
       if (!isReady) setIsReady(true);
     }, 2000);
 
-    return () => clearTimeout(timeout);
+    const unsubscribe = subscribeAuthChange((authenticated) => {
+      setIsAuthenticated(authenticated);
+    });
+
+    return () => {
+      clearTimeout(timeout);
+      unsubscribe();
+    };
   }, [isReady]);
 
-  const handleAuthCallback = useCallback(async (response: { code: string }) => {
-    setIsLoading(true);
-    try {
-      const tokens = await exchangeCodeForTokens(response.code);
-      saveTokens(tokens);
-      setIsAuthenticated(true);
-      showToast('Conectado con Google', 'success');
-      onAuthenticated?.();
-    } catch (error) {
-      console.error('Auth error:', error);
-      showToast('Error al conectar con Google', 'danger');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [showToast, onAuthenticated]);
-
   const handleLogin = useCallback(() => {
+    if (processingRef.current) return;
     if (!window.google?.accounts?.oauth2) {
       showToast('Google no disponible. Recarga la página.', 'danger');
       return;
     }
 
+    processingRef.current = true;
     setIsLoading(true);
+
     const timeout = setTimeout(() => {
+      processingRef.current = false;
       setIsLoading(false);
     }, 30000);
 
-    const client = initGoogleAuth((response) => {
+    const client = initGoogleAuth((response: { code?: string }) => {
       clearTimeout(timeout);
+      processingRef.current = false;
+
       if (response.code) {
-        handleAuthCallback(response);
+        setIsLoading(true);
+        exchangeCodeForTokens(response.code)
+          .then((tokens) => {
+            saveTokens(tokens);
+            setIsAuthenticated(true);
+            showToast('Conectado con Google', 'success');
+            onAuthenticated?.();
+          })
+          .catch((error) => {
+            console.error('Auth error:', error);
+            showToast('Error al conectar con Google', 'danger');
+          })
+          .finally(() => {
+            setIsLoading(false);
+          });
       } else {
         setIsLoading(false);
       }
@@ -70,9 +83,11 @@ export function GoogleLoginButton({ onAuthenticated }: GoogleLoginButtonProps) {
       client.requestCode();
     } else {
       clearTimeout(timeout);
+      processingRef.current = false;
       setIsLoading(false);
+      showToast('Error al iniciar Google. Recarga la página.', 'danger');
     }
-  }, [handleAuthCallback, showToast]);
+  }, [showToast, onAuthenticated]);
 
   if (!isReady) {
     return (

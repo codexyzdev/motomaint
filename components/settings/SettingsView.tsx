@@ -32,6 +32,7 @@ export default function SettingsView() {
   const [moto, setMoto] = useState<Moto | null>(null);
   const [services, setServices] = useState<TipoServicio[]>([]);
   const [modalState, setModalState] = useState<ModalState>({ type: 'none' });
+  const [googleConnected, setGoogleConnected] = useState(false);
 
   const [editServiceName, setEditServiceName] = useState('');
   const [editServiceIcon, setEditServiceIcon] = useState(DEFAULT_SERVICE_ICON);
@@ -280,8 +281,8 @@ export default function SettingsView() {
           <p className="settings-description">
             Conecta tu cuenta de Google para respaldar tus datos automáticamente en Google Drive.
           </p>
-          <GoogleLoginButton />
-          <SyncStatus />
+          <GoogleLoginButton key={`auth-${googleConnected}`} onAuthenticated={() => setGoogleConnected(true)} />
+          <SyncStatus key={`sync-${googleConnected}`} />
         </section>
 
         <section className="settings-section danger-zone">

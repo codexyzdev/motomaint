@@ -57,6 +57,8 @@ interface RevokeResponse {
   error?: string;
 }
 
+import { notifyAuthChange } from './authEvents';
+
 function generateState(): string {
   const array = new Uint8Array(16);
   crypto.getRandomValues(array);
@@ -93,6 +95,7 @@ export function saveTokens(tokens: GoogleTokens): void {
   const key = getStorageKey();
   const encrypted = encryptToken(JSON.stringify(tokens), key);
   localStorage.setItem(TOKEN_STORAGE_KEY, encrypted);
+  notifyAuthChange(true);
 }
 
 export function loadTokens(): GoogleTokens | null {
@@ -210,12 +213,14 @@ export function revokeGoogleAccess(): Promise<void> {
     const tokens = loadTokens();
     if (!tokens?.access_token) {
       clearTokens();
+      notifyAuthChange(false);
       resolve();
       return;
     }
 
     window.google?.accounts?.oauth2?.revoke(tokens.access_token, (response) => {
       clearTokens();
+      notifyAuthChange(false);
       if (response.successful) {
         resolve();
       } else {
@@ -224,3 +229,5 @@ export function revokeGoogleAccess(): Promise<void> {
     });
   });
 }
+
+export { notifyAuthChange } from './authEvents';

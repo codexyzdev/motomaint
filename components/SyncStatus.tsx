@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { getAuthState, getValidAccessToken, clearTokens, revokeGoogleAccess } from '@/lib/googleAuth';
+import { subscribeAuthChange } from '@/lib/authEvents';
 import { uploadBackup, downloadBackup, getLastBackupInfo } from '@/lib/googleDrive';
 import { data } from '@/lib/data';
 import { useToast } from '@/components/ui/useToast';
@@ -26,6 +27,14 @@ export function SyncStatus({ onStateChange }: SyncStatusProps) {
 
     checkAuth();
 
+    const unsubscribe = subscribeAuthChange((authenticated) => {
+      setIsAuthenticated(authenticated);
+      if (!authenticated) {
+        setLastSync(null);
+      }
+      onStateChange?.(authenticated);
+    });
+
     const loadLastSync = async () => {
       try {
         const info = await getLastBackupInfo();
@@ -38,6 +47,8 @@ export function SyncStatus({ onStateChange }: SyncStatusProps) {
     };
 
     loadLastSync();
+
+    return () => { unsubscribe(); };
   }, [onStateChange]);
 
   const handleSync = useCallback(async () => {
