@@ -1,4 +1,4 @@
-import { getValidAccessToken, clearTokens } from './googleAuth';
+import { getValidAccessToken, getValidAccessTokenWithRefresh, clearTokens } from './googleAuth';
 import type { BackupPayload } from './types';
 
 const DRIVE_API = 'https://www.googleapis.com/drive/v3';
@@ -28,13 +28,39 @@ async function getHeaders(): Promise<HeadersInit> {
   };
 }
 
-async function findOrCreateFolder(): Promise<string> {
-  const headers = await getHeaders();
+async function fetchWithAuthRetry(url: string, options: RequestInit): Promise<Response> {
+  let headers = await getHeaders();
+  let response = await fetch(url, { ...options, headers });
 
-  const searchResponse = await fetch(
+  if (response.status === 401) {
+    const newToken = await getValidAccessTokenWithRefresh();
+    if (newToken) {
+      headers = { ...options.headers as Record<string, string>, 'Authorization': `Bearer ${newToken}` };
+      response = await fetch(url, { ...options, headers });
+    }
+  }
+
+  return response;
+}
+
+async function findOrCreateFolder(): Promise<string> {
+  let headers = await getHeaders();
+
+  let searchResponse = await fetch(
     `${DRIVE_API}/files?q=name='${FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
     { headers }
   );
+
+  if (searchResponse.status === 401) {
+    const newToken = await getValidAccessTokenWithRefresh();
+    if (newToken) {
+      headers = { ...headers, 'Authorization': `Bearer ${newToken}` };
+      searchResponse = await fetch(
+        `${DRIVE_API}/files?q=name='${FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+        { headers }
+      );
+    }
+  }
 
   if (!searchResponse.ok) {
     throw new Error('Failed to search for folder');
@@ -67,12 +93,23 @@ async function findOrCreateFolder(): Promise<string> {
 }
 
 async function findBackupFile(folderId: string): Promise<DriveFile | null> {
-  const headers = await getHeaders();
+  let headers = await getHeaders();
 
-  const response = await fetch(
+  let response = await fetch(
     `${DRIVE_API}/files?q=name='${FILE_NAME}' and '${folderId}' in parents and trashed=false`,
     { headers }
   );
+
+  if (response.status === 401) {
+    const newToken = await getValidAccessTokenWithRefresh();
+    if (newToken) {
+      headers = { ...headers, 'Authorization': `Bearer ${newToken}` };
+      response = await fetch(
+        `${DRIVE_API}/files?q=name='${FILE_NAME}' and '${folderId}' in parents and trashed=false`,
+        { headers }
+      );
+    }
+  }
 
   if (!response.ok) {
     throw new Error('Failed to search for backup file');
@@ -88,10 +125,10 @@ export async function uploadBackup(data: BackupPayload): Promise<{ success: bool
     const existingFile = await findBackupFile(folderId);
 
     const jsonData = JSON.stringify(data, null, 2);
-    const headers = await getHeaders();
+    let headers = await getHeaders();
 
     if (existingFile) {
-      const response = await fetch(
+      let response = await fetch(
         `${DRIVE_UPLOAD_API}/files/${existingFile.id}`,
         {
           method: 'PATCH',
@@ -102,6 +139,24 @@ export async function uploadBackup(data: BackupPayload): Promise<{ success: bool
           body: jsonData,
         }
       );
+
+      if (response.status === 401) {
+        const newToken = await getValidAccessTokenWithRefresh();
+        if (newToken) {
+          headers = { ...headers, 'Authorization': `Bearer ${newToken}` };
+          response = await fetch(
+            `${DRIVE_UPLOAD_API}/files/${existingFile.id}`,
+            {
+              method: 'PATCH',
+              headers: {
+                ...headers,
+                'Content-Type': MIME_TYPE,
+              },
+              body: jsonData,
+            }
+          );
+        }
+      }
 
       if (!response.ok) {
         throw new Error('Failed to update backup file');
@@ -115,7 +170,7 @@ export async function uploadBackup(data: BackupPayload): Promise<{ success: bool
         parents: [folderId],
       };
 
-      const response = await fetch(
+      let response = await fetch(
         `${DRIVE_UPLOAD_API}/files?uploadType=multipart`,
         {
           method: 'POST',
@@ -137,6 +192,35 @@ export async function uploadBackup(data: BackupPayload): Promise<{ success: bool
           ].join('\r\n'),
         }
       );
+
+      if (response.status === 401) {
+        const newToken = await getValidAccessTokenWithRefresh();
+        if (newToken) {
+          headers = { ...headers, 'Authorization': `Bearer ${newToken}` };
+          response = await fetch(
+            `${DRIVE_UPLOAD_API}/files?uploadType=multipart`,
+            {
+              method: 'POST',
+              headers: {
+                ...headers,
+                'Content-Type': 'multipart/related; boundary=boundary',
+              },
+              body: [
+                '--boundary',
+                'Content-Type: application/json',
+                '',
+                JSON.stringify(metadata),
+                '',
+                '--boundary',
+                `Content-Type: ${MIME_TYPE}`,
+                '',
+                jsonData,
+                '--boundary--',
+              ].join('\r\n'),
+            }
+          );
+        }
+      }
 
       if (!response.ok) {
         throw new Error('Failed to create backup file');
@@ -163,12 +247,23 @@ export async function downloadBackup(): Promise<BackupPayload | null> {
       return null;
     }
 
-    const headers = await getHeaders();
+    let headers = await getHeaders();
 
-    const response = await fetch(
+    let response = await fetch(
       `${DRIVE_API}/files/${file.id}?alt=media`,
       { headers }
     );
+
+    if (response.status === 401) {
+      const newToken = await getValidAccessTokenWithRefresh();
+      if (newToken) {
+        headers = { ...headers, 'Authorization': `Bearer ${newToken}` };
+        response = await fetch(
+          `${DRIVE_API}/files/${file.id}?alt=media`,
+          { headers }
+        );
+      }
+    }
 
     if (!response.ok) {
       throw new Error('Failed to download backup');

@@ -172,6 +172,23 @@ export async function getValidAccessToken(): Promise<string | null> {
   return tokens.access_token;
 }
 
+export async function getValidAccessTokenWithRefresh(): Promise<string | null> {
+  const tokens = loadTokens();
+  if (!tokens?.access_token) return null;
+
+  if (!tokens.refresh_token) return null;
+
+  try {
+    const newTokens = await refreshAccessToken(tokens.refresh_token);
+    newTokens.issued_at = Date.now();
+    saveTokens(newTokens);
+    return newTokens.access_token;
+  } catch {
+    clearTokens();
+    return null;
+  }
+}
+
 export function getAuthState(): GoogleAuthState {
   const tokens = loadTokens();
   if (!tokens?.access_token) {

@@ -1,4 +1,4 @@
-const CACHE_NAME = `motomaint-${process.env.NEXT_PUBLIC_VERCEL_DEPLOYMENT_ID || 'dev'}`;
+const CACHE_NAME = 'motomaint-app';
 
 self.addEventListener('install', () => {
   self.skipWaiting();
