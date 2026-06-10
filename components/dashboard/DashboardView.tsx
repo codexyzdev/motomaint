@@ -140,7 +140,7 @@ export default function DashboardView() {
     return (
       <div className="splash" role="status" aria-label="Cargando">
         <div className="splash-mark" aria-hidden="true">
-          <span style={{ fontSize: '1.5rem' }}>🏍️</span>
+          <img src="/logo.webp" alt="" width={56} height={56} />
         </div>
         <p className="splash-name">MotoMaint</p>
         <span className="splash-tag">Hoja de inspección</span>
