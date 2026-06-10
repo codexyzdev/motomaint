@@ -54,37 +54,37 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 };
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'MotoMaint',
+  description: 'Registra y rastrea el mantenimiento de tu motocicleta',
+  url: 'https://motomaint.vercel.app',
+  applicationCategory: 'UtilitiesApplication',
+  operatingSystem: 'Web Browser',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  breadcrumb: {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://motomaint.vercel.app',
+      },
+    ],
+  },
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'WebApplication',
-    name: 'MotoMaint',
-    description: 'Registra y rastrea el mantenimiento de tu motocicleta',
-    url: 'https://motomaint.app',
-    applicationCategory: 'UtilitiesApplication',
-    operatingSystem: 'Web Browser',
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'USD',
-    },
-    breadcrumb: {
-      '@type': 'BreadcrumbList',
-      itemListElement: [
-        {
-          '@type': 'ListItem',
-          position: 1,
-          name: 'Home',
-          item: 'https://motomaint.vercel.app',
-        },
-      ],
-    },
-  };
-
   return (
     <html
       lang="es"
