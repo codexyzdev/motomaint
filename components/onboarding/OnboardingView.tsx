@@ -40,7 +40,7 @@ export default function OnboardingView({ onComplete }: OnboardingViewProps) {
       <header className="view-header">
         <div className="view-header-main">
           <div className="view-header-titles">
-            <p className="view-eyebrow">Folio · 000 — Inicio</p>
+            <p className="view-eyebrow">Inicio</p>
             <h1 className="view-title">MotoMaint</h1>
           </div>
         </div>
