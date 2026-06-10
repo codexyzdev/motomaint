@@ -1,121 +1,217 @@
-# Spec: Theme Switching with next-themes
+# Spec: Cloud Sync con Supabase
 
 ## Objective
 
-Agregar alternancia de tema (light/dark) usando `next-themes`. Mantener el CSS existente en `globals.css` y solo agregar variables CSS para el tema claro. El tema se persistirá en localStorage y será accesible via context.
+Agregar sincronización en la nube usando Supabase. Los datos del usuario (moto, servicios, historial) se respaldan en Postgres y son accesibles desde cualquier dispositivo. El usuario crea una cuenta, hace login, y sus datos se sincronizan automáticamente.
 
-**Usuario:** El usuario puede alternar entre tema oscuro, tema claro, y tema del sistema desde Settings. El ciclo es: dark → light → system → dark.
+**Usuario:** Dueño de moto que quiere acceder a su cuaderno de mantenimiento desde cualquier dispositivo.
 
 ## Tech Stack
 
-- Framework: Next.js 16 (App Router)
-- Theme: [next-themes](https://www.npmjs.com/package/next-themes) - última versión
-- Styling: CSS variables en `globals.css` + Tailwind CSS v4
-- Persistencia: localStorage via next-themes
+- **Backend:** Supabase (Postgres + Auth + Realtime)
+- **Cliente:** `@supabase/supabase-js`
+- **Framework:** Next.js 16 (App Router)
+- **Estrategia:** localStorage como cache local, Supabase como source of truth
 
 ## Assumptions
 
-1. El proyecto usa App Router (confirmado)
-2. Tailwind v4 está configurado con `@tailwindcss/postcss` (sin tailwind.config.js)
-3. El tema oscuro actual usa variables CSS en `:root` (`--ink`, `--paper`, `--accent`, etc.)
-4. No hay ThemeProvider existente - next-themes provee el suyo
-5. Settings tiene un componente `SettingsView.tsx` donde se agregará el toggle
+1. Supabase ya tiene proyecto creado por el usuario
+2. El usuario configurará las variables de entorno (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
+3. Los datos actuales en localStorage se migran a Supabase al hacer login por primera vez
+4. Si no hay conexión, la app funciona con localStorage (offline-first)
 
-## Commands
+## Data Model
 
-```bash
-Install: npm install next-themes
-Build: npm run build
-Dev: npm run dev
-Lint: npm run lint
+### Tablas en Supabase
+
+```sql
+-- Tabla de perfiles (extensión de auth.users)
+create table profiles (
+  id uuid references auth.users primary key,
+  created_at timestamptz default now()
+);
+
+-- Tabla de motos
+create table motos (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references profiles(id) on delete cascade,
+  marca text not null,
+  modelo text not null,
+  kmActual integer not null default 0,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+-- Tabla de tipos de servicio
+create table servicios (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references profiles(id) on delete cascade,
+  name text not null,
+  icon text not null,
+  intervalKm integer,
+  intervalDays integer,
+  enabled boolean default true,
+  created_at timestamptz default now()
+);
+
+-- Tabla de registros de mantenimiento
+create table registros (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references profiles(id) on delete cascade,
+  serviceId uuid references servicios(id) on delete cascade,
+  serviceName text not null,
+  serviceIcon text not null,
+  km integer not null,
+  date timestamptz not null,
+  notes text,
+  created_at timestamptz default now()
+);
+
+-- Row Level Security
+alter table profiles enable row level security;
+alter table motos enable row level security;
+alter table servicios enable row level security;
+alter table registros enable row level security;
+
+-- Políticas RLS
+create policy "Users can only see their own data"
+ on profiles for select using (auth.uid() = id);
+
+create policy "Users can only insert their own data"
+  on profiles for insert with check (auth.uid() = id);
+
+create policy "Users can only update their own data"
+  on profiles for update using (auth.uid() = id);
+
+-- Repetir políticas similares para motos, servicios, registros
 ```
 
 ## Project Structure
 
 ```
-app/
-├── globals.css         # Variables CSS existentes + variables light mode
-├── layout.tsx         # Envuelve ThemeProvider de next-themes
-└── settings/
-    └── page.tsx       # Settings page
+lib/
+├── supabase.ts          # Cliente de Supabase (nuevo)
+├── data.ts              # Refactorizado para usar Supabase o localStorage
+├── types.ts             # Tipos existentes
 
 components/
+├── auth/
+│   ├── AuthModal.tsx    # Modal de login/register (nuevo)
+│   └── AuthProvider.tsx # Provider de autenticación (nuevo)
 ├── settings/
-│   ├── SettingsView.tsx  # Donde irá el ThemeToggle
-│   └── ThemeToggle.tsx    # Componente toggle (nuevo)
-└── ui/                   # Componentes existentes (sin cambios)
+│   └── SettingsView.tsx # Agregar botón de logout y estado de sync
 ```
 
-## Code Style
+## Commands
 
-**ThemeToggle component (nuevo):**
+```bash
+Install: pnpm add @supabase/supabase-js
+Build: pnpm run build
+Dev: pnpm run dev
+Lint: pnpm run lint
+```
 
-Ciclo: dark → light → system → dark
+## Sync Flow
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        APP START                            │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+              ┌───────────────────────────┐
+              │ ¿Hay usuario logueado?    │
+              └─────────────┬─────────────┘
+                    ┌──────┴──────┐
+                    │ │
+ Sí No
+                    │            │
+                    ▼            ▼
+ ┌──────────────┐  ┌──────────────────┐
+        │ Sync desde   │  │ Usar localStorage │
+        │ Supabase    │  │ (offline-first)  │
+        └──────┬──────┘  └──────────────────┘
+ │
+               ▼
+    ┌──────────────────────┐
+    │ ¿Datos en localStorage│
+    │ sin sincronizar?     │
+    └──────────┬───────────┘
+               │
+              Sí (primera vez)
+               │
+               ▼
+    ┌──────────────────────┐
+    │ Migrar datos locales  │
+    │ a Supabase           │
+    └──────────────────────┘
+```
+
+## Auth Modal
 
 ```tsx
-'use client';
+// Componente de login/register
+export function AuthModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-import { useTheme } from 'next-themes';
-import { useEffect, useState } from 'react';
-
-const themes = ['dark', 'light', 'system'] as const;
-
-export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
-
-  if (!mounted) return <div className="icon-btn" style={{ width: 36, height: 36 }} />;
-
-  function handleClick() {
-    const currentIndex = themes.indexOf(theme as any);
-    const nextIndex = (currentIndex + 1) % themes.length;
-    setTheme(themes[nextIndex]);
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    if (isLogin) {
+      await supabase.auth.signInWithPassword({ email, password });
+    } else {
+      await supabase.auth.signUp({ email, password });
+    }
+    setLoading(false);
+    onClose();
   }
 
   return (
-    <button className="icon-btn" onClick={handleClick} aria-label="Cambiar tema">
-      {/* Iconos SVG inline: luna (dark), sol (light), monitor (system) */}
-    </button>
+    <Modal title={isLogin ? 'Iniciar sesión' : 'Crear cuenta'}>
+      <form onSubmit={handleSubmit}>
+        <input type="email" value={email} onChange={e => setEmail(e.target.value)} />
+        <input type="password" value={password} onChange={e => setPassword(e.target.value)} />
+        <button type="submit" disabled={loading}>
+          {loading ? 'Cargando...' : isLogin ? 'Entrar' : 'Registrarse'}
+        </button>
+      </form>
+      <button onClick={() => setIsLogin(!isLogin)}>
+        {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
+      </button>
+    </Modal>
   );
 }
 ```
 
-**CSS variables light mode en globals.css:**
-
-```css
-[data-theme='light'] {
-  --ink: #ffffff;
-  --paper: #1a1a1a;
-  --accent: #3b82f6;
-  --stamp-ok: #22c55e;
-  --stamp-warn: #eab308;
-  --stamp-urgent: #ef4444;
-  --bg-primary: #f8fafc;
-  --bg-secondary: #e2e8f0;
-  --bg-tertiary: #cbd5e1;
-}
-```
-
-## Testing Strategy
-
-- Verificar que el toggle cambia el tema visualmente
-- Verificar que el tema se persiste al recargar la página
-- Verificar que no hay hydration mismatch (usar `mounted` state)
-- Verificar que el `data-theme` attribute se aplica al `<html>`
-
 ## Boundaries
 
 **Always:**
-- Usar `useTheme` de next-themes para acceder al tema
-- Esperar a que el componente se monte (`mounted` state) antes de mostrar el toggle
-- Mantener las variables CSS existentes del tema oscuro
+- Mantener localStorage como fallback offline
+- Usar RLS en Supabase para seguridad
+- No exponer claves de API en código cliente (usar anon key)
 
 **Ask first:**
-- Cambiar la estructura de CSS existente
-- Agregar nuevas dependencias además de next-themes
+- Cambiar el schema de base de datos
+- Agregar más tablas o relaciones
+- Cambiar la estrategia de sync
 
 **Never:**
-- Eliminar las variables CSS del tema oscuro
-- Usar `localStorage` directamente (next-themes lo maneja)
+- Guardar datos de usuarios en localStorage cuando están logueados (ya no es necesario)
+- Compartir datos entre usuarios
+
+## Open Questions
+
+1. ¿Prefieres autenticación por email/password o prefieres OAuth (Google, GitHub)?
+2. ¿Cuántos dispositivos estima el usuario que usarán?
+3. ¿Necesitas que los datos sean privados por usuario o está bien que sean públicos?
+
+## Success Criteria
+
+- [ ] Usuario puede crear cuenta y hacer login
+- [ ] Datos se sincronizan a Supabase tras login
+- [ ] App funciona offline con localStorage si no hay conexión
+- [ ] Al hacer logout, los datos locales permanecen
+- [ ] Nuevo dispositivo puede acceder a los datos del usuario
