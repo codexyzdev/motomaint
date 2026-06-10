@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { data } from '@/lib/data';
-import { useAutoSync } from '@/lib/useAutoSync';
 import OnboardingView from '@/components/onboarding/OnboardingView';
 import DashboardView from '@/components/dashboard/DashboardView';
 
@@ -11,8 +10,6 @@ type View = 'onboarding' | 'dashboard' | null;
 
 export default function SplashGate() {
   const [view, setView] = useState<View>(null);
-
-  useAutoSync();
 
   useEffect(() => {
     let cancelled = false;

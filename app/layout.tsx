@@ -6,6 +6,7 @@ import './globals.css';
 import { ToastProvider } from '@/components/ui/useToast';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { ServiceWorkerRegister } from '@/components/ServiceWorkerRegister';
+import { SyncProvider } from '@/components/SyncProvider';
 
 const poppins = Poppins({
   variable: '--font-poppins',
@@ -101,7 +102,10 @@ export default function RootLayout({
         <ServiceWorkerRegister />
         <ErrorBoundary>
           <ThemeProvider attribute="data-theme" defaultTheme="dark" enableSystem>
-            <ToastProvider>{children}</ToastProvider>
+            <ToastProvider>
+              <SyncProvider />
+              {children}
+            </ToastProvider>
           </ThemeProvider>
         </ErrorBoundary>
         <Script
