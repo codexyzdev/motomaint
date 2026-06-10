@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Poppins } from 'next/font/google';
+import { ThemeProvider } from 'next-themes';
 import './globals.css';
 import { ToastProvider } from '@/components/ui/useToast';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
@@ -34,10 +35,13 @@ export default function RootLayout({
     <html
       lang="es"
       className={`${poppins.variable} antialiased`}
+      suppressHydrationWarning
     >
       <body>
         <ErrorBoundary>
-          <ToastProvider>{children}</ToastProvider>
+          <ThemeProvider attribute="data-theme" defaultTheme="dark" enableSystem>
+            <ToastProvider>{children}</ToastProvider>
+          </ThemeProvider>
         </ErrorBoundary>
       </body>
     </html>

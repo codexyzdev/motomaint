@@ -10,6 +10,7 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import EditMotoModal from '@/components/ui/EditMotoModal';
 import ServiceTypeRow from './ServiceTypeRow';
 import IconPicker from './IconPicker';
+import { ThemeToggle } from './ThemeToggle';
 
 const DEFAULT_SERVICE_ICON = '🔧';
 
@@ -209,6 +210,7 @@ export default function SettingsView() {
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
           </button>
+          <ThemeToggle />
         </div>
       </header>
 
