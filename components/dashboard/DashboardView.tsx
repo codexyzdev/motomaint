@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useId } from 'react';
+import { useState, useEffect, useCallback, useId, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { data } from '@/lib/data';
@@ -54,8 +54,8 @@ export default function DashboardView() {
     refresh();
   }, [refresh]);
 
-  const urgentCount = services.filter((s) => s.status === 'urgent').length;
-  const warningCount = services.filter((s) => s.status === 'warning').length;
+  const urgentCount = useMemo(() => services.filter((s) => s.status === 'urgent').length, [services]);
+  const warningCount = useMemo(() => services.filter((s) => s.status === 'warning').length, [services]);
 
   function openEditMoto() {
     if (!moto) return;

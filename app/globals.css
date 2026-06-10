@@ -918,7 +918,7 @@ body {
 /* ====================================================
    SERVICE CARD — fila con sello de estado
    ==================================================== */
-.service-list { display: flex; flex-direction: column; gap: 8px; }
+.service-list { display: flex; flex-direction: column; gap: 8px; content-visibility: auto; contain-intrinsic-size: 0 200px; }
 
 .service-card {
   background: var(--ink-2);
@@ -994,7 +994,7 @@ body {
 }
 .service-stamp.ok      { color: var(--stamp-ok); }
 .service-stamp.warning { color: var(--stamp-warn); }
-.service-stamp.urgent  { color: var(--stamp-urgent); animation: stampIn 0.55s var(--t) both; }
+.service-stamp.urgent  { color: var(--stamp-urgent); }
 
 .service-status {
   font-family: var(--font-poppins), 'Poppins', sans-serif;
