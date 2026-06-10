@@ -182,7 +182,7 @@ export default function SettingsView() {
 
   if (!moto) {
     return (
-      <div className="splash" role="status" aria-label="Cargando">
+      <div className="splash" aria-label="Cargando">
         <div className="splash-mark" aria-hidden="true">
           <span style={{ fontSize: '1.5rem' }}>🏍️</span>
         </div>
@@ -250,7 +250,7 @@ export default function SettingsView() {
               />
             ))}
           </div>
-          <button className="btn btn-secondary add-service-btn" onClick={openAddService}>
+          <button type="button" className="btn btn-secondary add-service-btn" onClick={openAddService}>
             <span style={{ color: 'var(--accent)' }}>+</span> Agregar servicio personalizado
           </button>
         </section>
@@ -269,6 +269,7 @@ export default function SettingsView() {
             accept=".json"
             style={{ display: 'none' }}
             onChange={handleImportFile}
+            aria-label="Importar archivo de backup"
           />
         </section>
 

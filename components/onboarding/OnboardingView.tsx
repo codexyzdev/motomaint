@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { data } from '@/lib/data';
 import { useToast } from '@/components/ui/useToast';
 
@@ -47,7 +48,7 @@ export default function OnboardingView({ onComplete }: OnboardingViewProps) {
       </header>
 
       <div className="onboarding-illu" aria-hidden="true">
-        <img src="/logo.webp" alt="" width={72} height={72} />
+        <Image src="/logo.webp" alt="" width={72} height={72} />
       </div>
 
       <p className="onboarding-lead">

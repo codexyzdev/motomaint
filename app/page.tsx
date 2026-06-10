@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { data } from '@/lib/data';
 import OnboardingView from '@/components/onboarding/OnboardingView';
 import DashboardView from '@/components/dashboard/DashboardView';
@@ -33,10 +34,10 @@ export default function SplashGate() {
 
   if (view === null) {
     return (
-      <div className="splash" role="status" aria-label="Cargando MotoMaint">
+      <div className="splash" aria-label="Cargando MotoMaint">
         <div className="splash-mark" aria-hidden="true">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.webp" alt="" width={56} height={56} />
+          <Image src="/logo.webp" alt="" width={56} height={56} />
         </div>
         <p className="splash-name">MotoMaint</p>
         <span className="splash-tag">Hoja de inspección</span>

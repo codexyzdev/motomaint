@@ -52,6 +52,7 @@ export default function ServiceCard({
         </div>
       </div>
       <button
+        type="button"
         className="service-check"
         onClick={handleCheckClick}
         aria-label={`Marcar ${service.name} como hecho`}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useId } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { data } from '@/lib/data';
 import { computeServicesStatus } from '@/lib/engine';
@@ -138,9 +139,9 @@ export default function DashboardView() {
 
   if (!moto) {
     return (
-      <div className="splash" role="status" aria-label="Cargando">
+      <div className="splash" aria-label="Cargando">
         <div className="splash-mark" aria-hidden="true">
-          <img src="/logo.webp" alt="" width={56} height={56} />
+          <Image src="/logo.webp" alt="" width={56} height={56} />
         </div>
         <p className="splash-name">MotoMaint</p>
         <span className="splash-tag">Hoja de inspección</span>
@@ -158,6 +159,7 @@ export default function DashboardView() {
               <h1 className="view-title">MotoMaint</h1>
             </div>
             <button
+              type="button"
               className="icon-btn"
               onClick={() => router.push('/settings')}
               aria-label="Ajustes"

@@ -27,6 +27,7 @@ export default function ServiceTabs({
     <div>
       <div className="tabs" role="tablist">
         <button
+          type="button"
           role="tab"
           aria-selected={activeTab === 'services'}
           className={activeTab === 'services' ? 'tab active' : 'tab'}
@@ -35,6 +36,7 @@ export default function ServiceTabs({
           Servicios · {services.length}
         </button>
         <button
+          type="button"
           role="tab"
           aria-selected={activeTab === 'history'}
           className={activeTab === 'history' ? 'tab active' : 'tab'}

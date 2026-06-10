@@ -33,10 +33,12 @@ export function formatDate(iso: string): string {
   return date.toLocaleDateString('es-CO');
 }
 
+const esNumberFormat = new Intl.NumberFormat('es-CO');
+
 /**
  * Format a number with thousand separators using the es-CO locale
  * (uses '.' as the thousands separator, e.g. 1000 → '1.000').
  */
 export function formatNumber(n: number): string {
-  return new Intl.NumberFormat('es-CO').format(n);
+  return esNumberFormat.format(n);
 }
