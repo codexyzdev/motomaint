@@ -24,7 +24,7 @@ export default function ServiceTabs({
   onDeleteRecord,
 }: ServiceTabsProps) {
   return (
-    <div>
+<div>
       <div className="tabs" role="tablist">
         <button
           type="button"
@@ -58,18 +58,13 @@ export default function ServiceTabs({
             </div>
           ) : (
             <div className="service-list">
-              {services.map((service, i) => (
-                <div
+              {services.map((service) => (
+                <ServiceCard
                   key={service.id}
-                  className="anim-rise"
-                  style={{ animationDelay: `${0.04 * i}s` }}
-                >
-                  <ServiceCard
-                    service={service}
-                    onCardClick={onServiceCardClick}
-                    onCheckClick={onServiceCheckClick}
-                  />
-                </div>
+                  service={service}
+                  onCardClick={onServiceCardClick}
+                  onCheckClick={onServiceCheckClick}
+                />
               ))}
             </div>
           )}
@@ -88,17 +83,12 @@ export default function ServiceTabs({
             </div>
           ) : (
             <div className="service-list">
-              {history.slice(0, 30).map((record, i) => (
-                <div
+              {history.slice(0, 30).map((record) => (
+                <HistoryItem
                   key={record.id}
-                  className="anim-rise"
-                  style={{ animationDelay: `${0.04 * i}s` }}
-                >
-                  <HistoryItem
-                    record={record}
-                    onDelete={onDeleteRecord}
-                  />
-                </div>
+                  record={record}
+                  onDelete={onDeleteRecord}
+                />
               ))}
             </div>
           )}
