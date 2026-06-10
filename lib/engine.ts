@@ -28,91 +28,90 @@ export async function computeServicesStatus(): Promise<ServicioCalculado[]> {
   const currentKm = moto.kmActual ?? 0;
   const now = Date.now();
 
-  return services
-    .filter(s => s.enabled)
-    .map(service => {
-      // Encontrar el último registro de este servicio (el más reciente por fecha)
-      const records = history.filter(r => r.serviceId === service.id);
-      const lastRecord =
-        records.length > 0
-          ? records.reduce((a, b) =>
-              new Date(a.date) > new Date(b.date) ? a : b
-            )
-          : null;
+  const result: ServicioCalculado[] = [];
 
-      let kmSinceLast: number | null = null;
-      let kmRemaining: number | null = null;
-      let kmProgress = 0;
+  for (const service of services) {
+    if (!service.enabled) continue;
 
-      let daysSinceLast: number | null = null;
-      let daysRemaining: number | null = null;
-      let daysProgress = 0;
+    const records = history.filter(r => r.serviceId === service.id);
+    const lastRecord =
+      records.length > 0
+        ? records.reduce((a, b) =>
+            new Date(a.date) > new Date(b.date) ? a : b
+          )
+        : null;
 
-      if (service.intervalKm !== null) {
-        const intervalKm = service.intervalKm;
-        if (lastRecord !== null) {
-          kmSinceLast = currentKm - lastRecord.km;
-        } else if (currentKm > 0) {
-          // Req 3.4: sin historial, usar km actuales como transcurridos
-          kmSinceLast = currentKm;
-        }
-        if (kmSinceLast !== null) {
-          kmRemaining = intervalKm - kmSinceLast;
-          kmProgress = Math.max(0, Math.min(1, kmSinceLast / intervalKm));
-        }
+    let kmSinceLast: number | null = null;
+    let kmRemaining: number | null = null;
+    let kmProgress = 0;
+
+    let daysSinceLast: number | null = null;
+    let daysRemaining: number | null = null;
+    let daysProgress = 0;
+
+    if (service.intervalKm !== null) {
+      const intervalKm = service.intervalKm;
+      if (lastRecord !== null) {
+        kmSinceLast = currentKm - lastRecord.km;
+      } else if (currentKm > 0) {
+        kmSinceLast = currentKm;
       }
-
-      if (service.intervalDays !== null) {
-        const intervalDays = service.intervalDays;
-        if (lastRecord !== null) {
-          daysSinceLast = Math.floor(
-            (now - new Date(lastRecord.date).getTime()) / DAY_MS
-          );
-          daysRemaining = intervalDays - daysSinceLast;
-          daysProgress = Math.max(0, Math.min(1, daysSinceLast / intervalDays));
-        } else {
-          // Req 3.4: sin historial con intervalDays → daysRemaining = intervalDays, daysProgress = 0
-          daysRemaining = intervalDays;
-          daysProgress = 0;
-        }
+      if (kmSinceLast !== null) {
+        kmRemaining = intervalKm - kmSinceLast;
+        kmProgress = Math.max(0, Math.min(1, kmSinceLast / intervalKm));
       }
+    }
 
-      // Determinar status: urgent > warning > ok
-      let status: 'ok' | 'warning' | 'urgent' = 'ok';
-
-      // Colectar progresses/remainings de intervalos configurados
-      const configured: Array<{ progress: number; remaining: number | null }> = [];
-      if (service.intervalKm !== null) {
-        configured.push({ progress: kmProgress, remaining: kmRemaining });
+    if (service.intervalDays !== null) {
+      const intervalDays = service.intervalDays;
+      if (lastRecord !== null) {
+        daysSinceLast = Math.floor(
+          (now - new Date(lastRecord.date).getTime()) / DAY_MS
+        );
+        daysRemaining = intervalDays - daysSinceLast;
+        daysProgress = Math.max(0, Math.min(1, daysSinceLast / intervalDays));
+      } else {
+        daysRemaining = intervalDays;
+        daysProgress = 0;
       }
-      if (service.intervalDays !== null) {
-        configured.push({ progress: daysProgress, remaining: daysRemaining });
-      }
+    }
 
-      for (const { remaining, progress } of configured) {
-        if (remaining !== null && remaining <= 0) {
-          status = 'urgent';
-          break;
-        }
-        if (progress >= 0.85) {
-          status = 'warning';
-        }
-      }
+    let status: 'ok' | 'warning' | 'urgent' = 'ok';
 
-      return {
-        ...service,
-        lastRecord: lastRecord
-          ? { km: lastRecord.km, date: lastRecord.date }
-          : null,
-        kmSinceLast,
-        kmRemaining,
-        kmProgress,
-        daysSinceLast,
-        daysRemaining,
-        daysProgress,
-        status,
-      } satisfies ServicioCalculado;
+    const configured: Array<{ progress: number; remaining: number | null }> = [];
+    if (service.intervalKm !== null) {
+      configured.push({ progress: kmProgress, remaining: kmRemaining });
+    }
+    if (service.intervalDays !== null) {
+      configured.push({ progress: daysProgress, remaining: daysRemaining });
+    }
+
+    for (const { remaining, progress } of configured) {
+      if (remaining !== null && remaining <= 0) {
+        status = 'urgent';
+        break;
+      }
+      if (progress >= 0.85) {
+        status = 'warning';
+      }
+    }
+
+    result.push({
+      ...service,
+      lastRecord: lastRecord
+        ? { km: lastRecord.km, date: lastRecord.date }
+        : null,
+      kmSinceLast,
+      kmRemaining,
+      kmProgress,
+      daysSinceLast,
+      daysRemaining,
+      daysProgress,
+      status,
     });
+  }
+
+  return result;
 }
 
 /**
