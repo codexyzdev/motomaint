@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Poppins } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
+import Script from 'next/script';
 import './globals.css';
 import { ToastProvider } from '@/components/ui/useToast';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
@@ -103,6 +104,10 @@ export default function RootLayout({
             <ToastProvider>{children}</ToastProvider>
           </ThemeProvider>
         </ErrorBoundary>
+        <Script
+          src="https://accounts.google.com/gsi/client"
+          strategy="lazyOnload"
+        />
       </body>
     </html>
   );

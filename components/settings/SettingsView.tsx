@@ -11,6 +11,8 @@ import EditMotoModal from '@/components/ui/EditMotoModal';
 import ServiceTypeRow from './ServiceTypeRow';
 import IconPicker from './IconPicker';
 import { ThemeToggle } from './ThemeToggle';
+import { GoogleLoginButton } from '@/components/GoogleLoginButton';
+import { SyncStatus } from '@/components/SyncStatus';
 
 const DEFAULT_SERVICE_ICON = '🔧';
 
@@ -271,6 +273,15 @@ export default function SettingsView() {
             onChange={handleImportFile}
             aria-label="Importar archivo de backup"
           />
+        </section>
+
+        <section className="settings-section">
+          <h2>Google Drive</h2>
+          <p className="settings-description">
+            Conecta tu cuenta de Google para respaldar tus datos automáticamente en Google Drive.
+          </p>
+          <GoogleLoginButton />
+          <SyncStatus />
         </section>
 
         <section className="settings-section danger-zone">
