@@ -4,7 +4,7 @@
 
 Agregar alternancia de tema (light/dark) usando `next-themes`. Mantener el CSS existente en `globals.css` y solo agregar variables CSS para el tema claro. El tema se persistirá en localStorage y será accesible via context.
 
-**Usuario:** El usuario puede alternar entre tema oscuro (actual) y tema claro desde Settings.
+**Usuario:** El usuario puede alternar entre tema oscuro, tema claro, y tema del sistema desde Settings. El ciclo es: dark → light → system → dark.
 
 ## Tech Stack
 
@@ -50,12 +50,15 @@ components/
 
 **ThemeToggle component (nuevo):**
 
+Ciclo: dark → light → system → dark
+
 ```tsx
 'use client';
 
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
-import { Sun, Moon } from 'lucide-react';
+
+const themes = ['dark', 'light', 'system'] as const;
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -63,15 +66,17 @@ export function ThemeToggle() {
 
   useEffect(() => setMounted(true), []);
 
-  if (!mounted) return null;
+  if (!mounted) return <div className="icon-btn" style={{ width: 36, height: 36 }} />;
+
+  function handleClick() {
+    const currentIndex = themes.indexOf(theme as any);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    setTheme(themes[nextIndex]);
+  }
 
   return (
-    <button
-      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className="p-2 rounded-lg hover:bg-[--accent] transition-colors"
- aria-label="Toggle theme"
-    >
-      {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+    <button className="icon-btn" onClick={handleClick} aria-label="Cambiar tema">
+      {/* Iconos SVG inline: luna (dark), sol (light), monitor (system) */}
     </button>
   );
 }
@@ -114,8 +119,3 @@ export function ThemeToggle() {
 **Never:**
 - Eliminar las variables CSS del tema oscuro
 - Usar `localStorage` directamente (next-themes lo maneja)
-
-## Open Questions
-
-1. ¿El toggle debe estar solo en Settings o también en el navbar/FAB?
-2. ¿Qué iconos prefieres para light/dark? (lucide-react Sun/Moon está bien?)
