@@ -13,11 +13,39 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: 'MotoMaint',
-  description: 'Registra y rastrea el mantenimiento de tu motocicleta',
+  title: {
+    default: 'MotoMaint - Cuaderno de Inspección de Motocicleta',
+    template: '%s | MotoMaint',
+  },
+  description: 'Registra y rastrea el mantenimiento de tu motocicleta. Controla aceite, calibración y revisiones con sellos de estado.',
+  keywords: ['mantenimiento motocicleta', 'cuaderno servicio', 'control aceite', 'revisiones moto', 'taller mecánico'],
+  authors: [{ name: 'MotoMaint' }],
+  creator: 'MotoMaint',
+  publisher: 'MotoMaint',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   appleWebApp: {
     capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'MotoMaint',
   },
+  openGraph: {
+    type: 'website',
+    locale: 'es_CO',
+    url: 'https://motomaint.app',
+    siteName: 'MotoMaint',
+    title: 'MotoMaint - Cuaderno de Inspección de Motocicleta',
+    description: 'Registra y rastrea el mantenimiento de tu motocicleta',
+ },
 };
 
 export const viewport: Viewport = {
@@ -31,6 +59,32 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: 'MotoMaint',
+    description: 'Registra y rastrea el mantenimiento de tu motocicleta',
+    url: 'https://motomaint.app',
+    applicationCategory: 'UtilitiesApplication',
+    operatingSystem: 'Web Browser',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+    },
+    breadcrumb: {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          position: 1,
+          name: 'Home',
+          item: 'https://motomaint.app',
+        },
+      ],
+    },
+  };
+
   return (
     <html
       lang="es"
@@ -38,6 +92,10 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <ErrorBoundary>
           <ThemeProvider attribute="data-theme" defaultTheme="dark" enableSystem>
             <ToastProvider>{children}</ToastProvider>
