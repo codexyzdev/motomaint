@@ -26,15 +26,18 @@ export default function MotoCard({
   const [tick, setTick] = useState(false);
   const prevKm = useRef(moto.kmActual);
 
+  if (moto.kmActual !== prevKm.current) {
+    prevKm.current = moto.kmActual;
+    setOdoDisplay(moto.kmActual);
+    setTick(true);
+  }
+
   useEffect(() => {
-    if (moto.kmActual !== prevKm.current) {
-      setOdoDisplay(moto.kmActual);
-      setTick(true);
+    if (tick) {
       const t = setTimeout(() => setTick(false), 520);
-      prevKm.current = moto.kmActual;
       return () => clearTimeout(t);
     }
-  }, [moto.kmActual]);
+  }, [tick]);
 
   async function handleDelta(delta: number) {
     const next = Math.max(0, moto.kmActual + delta);
