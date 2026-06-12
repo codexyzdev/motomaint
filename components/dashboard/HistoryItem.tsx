@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { Registro } from '@/lib/types';
 import { formatDate, formatNumber } from '@/lib/helpers';
 
@@ -8,7 +9,7 @@ interface HistoryItemProps {
   onDelete: (id: string) => void;
 }
 
-export default function HistoryItem({ record, onDelete }: HistoryItemProps) {
+const HistoryItem = memo(function HistoryItem({ record, onDelete }: HistoryItemProps) {
   return (
     <article className="history-item">
       <div className="history-icon">{record.serviceIcon}</div>
@@ -38,4 +39,6 @@ export default function HistoryItem({ record, onDelete }: HistoryItemProps) {
       </button>
     </article>
   );
-}
+});
+
+export default HistoryItem;

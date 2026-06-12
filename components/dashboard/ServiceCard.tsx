@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { formatServiceStatus, getMainProgress } from '@/lib/engine';
 import type { ServicioCalculado } from '@/lib/types';
 
@@ -15,7 +16,7 @@ const STAMP_LABEL: Record<ServicioCalculado['status'], string> = {
   ok: 'Ok',
 };
 
-export default function ServiceCard({
+const ServiceCard = memo(function ServiceCard({
   service,
   onCardClick,
   onCheckClick,
@@ -72,4 +73,6 @@ export default function ServiceCard({
       </button>
     </div>
   );
-}
+});
+
+export default ServiceCard;

@@ -26,11 +26,13 @@ export default function MotoCard({
   const [tick, setTick] = useState(false);
   const prevKm = useRef(moto.kmActual);
 
-  if (moto.kmActual !== prevKm.current) {
-    prevKm.current = moto.kmActual;
-    setOdoDisplay(moto.kmActual);
-    setTick(true);
-  }
+  useEffect(() => {
+    if (moto.kmActual !== prevKm.current) {
+      prevKm.current = moto.kmActual;
+      setOdoDisplay(moto.kmActual);
+      setTick(true);
+    }
+  }, [moto.kmActual]);
 
   useEffect(() => {
     if (tick) {
@@ -92,7 +94,7 @@ export default function MotoCard({
         </div>
       )}
       {urgentCount === 0 && warningCount > 0 && (
-        <div className="alert-banner warning">
+        <div className="alert-banner warning" role="alert">
           <span>◐</span>
           <span><b>{warningCount}</b> por vencer pronto</span>
           <span className="alert-mark">Revisar</span>

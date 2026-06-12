@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useId, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { data } from '@/lib/data';
@@ -13,8 +13,8 @@ import EditMotoModal from '@/components/ui/EditMotoModal';
 import MotoCard from './MotoCard';
 import ServiceTabs from './ServiceTabs';
 import FAB from './FAB';
-
-const MAX_NOTES_LENGTH = 500;
+import RecordServiceModal from './RecordServiceModal';
+import ServiceDetailModal from './ServiceDetailModal';
 
 type ModalState =
   | { type: 'none' }
@@ -57,28 +57,33 @@ export default function DashboardView() {
   const urgentCount = useMemo(() => services.filter((s) => s.status === 'urgent').length, [services]);
   const warningCount = useMemo(() => services.filter((s) => s.status === 'warning').length, [services]);
 
-  function openEditMoto() {
+  const openEditMoto = useCallback(() => {
     if (!moto) return;
     setModalState({ type: 'editMoto', moto });
-  }
+  }, [moto]);
 
-  function openEditKm() {
+  const openEditKm = useCallback(() => {
     if (!moto) return;
     setEditKmValue(String(moto.kmActual));
     setModalState({ type: 'editKm', currentKm: moto.kmActual });
-  }
+  }, [moto]);
 
   async function handleSaveKm() {
-    const km = parseInt(editKmValue) || 0;
-    await data.updateKm(Math.max(0, km));
-    await refresh();
-    showToast('Kilometraje actualizado', 'success');
+    try {
+      const km = parseInt(editKmValue) || 0;
+      await data.updateKm(Math.max(0, km));
+      await refresh();
+      showToast('Kilometraje actualizado', 'success');
+    } catch {
+      showToast('Error al actualizar el kilometraje', 'danger');
+    }
   }
 
-  async function handleOpenServicePicker() {
+  const handleOpenServicePicker = useCallback(async () => {
     const allServices = await data.getServices();
-    setModalState({ type: 'servicePicker', services: allServices });
-  }
+    const enabledServices = allServices.filter((s) => s.enabled !== false);
+    setModalState({ type: 'servicePicker', services: enabledServices });
+  }, []);
 
   function handleServiceSelect(service: TipoServicio) {
     setRecordKm(moto ? String(moto.kmActual) : '');
@@ -87,55 +92,63 @@ export default function DashboardView() {
   }
 
   async function handleSaveRecord() {
-    const km = parseInt(recordKm) || 0;
-    const recordModal = modalState;
-    if (recordModal.type !== 'recordService') return;
+    try {
+      const km = parseInt(recordKm) || 0;
+      const recordModal = modalState;
+      if (recordModal.type !== 'recordService') return;
 
-    const newRecord = await data.addRecord({
-      serviceId: recordModal.service.id,
-      serviceName: recordModal.service.name,
-      serviceIcon: recordModal.service.icon,
-      km,
-      date: new Date().toISOString(),
-      notes: recordNotes.trim(),
-    });
+      await data.addRecord({
+        serviceId: recordModal.service.id,
+        serviceName: recordModal.service.name,
+        serviceIcon: recordModal.service.icon,
+        km,
+        date: new Date().toISOString(),
+        notes: recordNotes.trim(),
+      });
 
-    if (moto && km > moto.kmActual) {
-      await data.updateKm(km);
+      if (moto && km > moto.kmActual) {
+        await data.updateKm(km);
+      }
+
+      await refresh();
+      showToast(`${recordModal.service.name} registrado`, 'success');
+    } catch {
+      showToast('Error al registrar el servicio', 'danger');
     }
-
-    await refresh();
-    showToast(`${recordModal.service.name} registrado`, 'success');
   }
 
-  function handleServiceCardClick(service: ServicioCalculado) {
+  const handleServiceCardClick = useCallback((service: ServicioCalculado) => {
     setModalState({ type: 'serviceDetail', service });
-  }
+  }, []);
 
-  function handleServiceCheckClick(service: ServicioCalculado) {
+  const handleServiceCheckClick = useCallback((service: ServicioCalculado) => {
     setRecordKm(moto ? String(moto.kmActual) : '');
     setRecordNotes('');
     setModalState({ type: 'recordService', service, defaultKm: moto?.kmActual ?? 0 });
-  }
+  }, [moto]);
 
-  function handleDeleteRecordClick(id: string) {
+  const handleDeleteRecordClick = useCallback((id: string) => {
     const record = history.find((r) => r.id === id);
     if (record) {
       setModalState({ type: 'confirmDeleteRecord', record });
     }
-  }
+  }, [history]);
 
   async function handleConfirmDeleteRecord() {
-    const recordModal = modalState;
-    if (recordModal.type !== 'confirmDeleteRecord') return;
-    await data.removeRecord(recordModal.record.id);
-    await refresh();
-    showToast('Registro eliminado', 'success');
+    try {
+      const recordModal = modalState;
+      if (recordModal.type !== 'confirmDeleteRecord') return;
+      await data.removeRecord(recordModal.record.id);
+      await refresh();
+      showToast('Registro eliminado', 'success');
+    } catch {
+      showToast('Error al eliminar el registro', 'danger');
+    }
   }
 
-  function closeModal() {
+  const closeModal = useCallback(() => {
     setModalState({ type: 'none' });
-  }
+  }, []);
 
   if (!moto) {
     return (
@@ -298,127 +311,4 @@ export default function DashboardView() {
   );
 }
 
-interface RecordServiceModalProps {
-  service: TipoServicio;
-  defaultKm: number;
-  recordKm: string;
-  setRecordKm: (v: string) => void;
-  recordNotes: string;
-  setRecordNotes: (v: string) => void;
-  onSave: () => Promise<void> | void;
-  onClose: () => void;
-}
 
-function RecordServiceModal({
-  service,
-  defaultKm,
-  recordKm,
-  setRecordKm,
-  recordNotes,
-  setRecordNotes,
-  onSave,
-  onClose,
-}: RecordServiceModalProps) {
-  const { showToast } = useToast();
-  const idPrefix = useId();
-
-  const handleSave = async () => {
-    const km = parseInt(recordKm) || 0;
-    if (km < 0) {
-      showToast('El kilometraje no puede ser negativo', 'danger');
-      return;
-    }
-    await onSave();
-  };
-
-  return (
-    <Modal
-      eyebrow="Sec. 02 · Sello de servicio"
-      title={`Registrar ${service.name}`}
-      subtitle={`Último servicio registrado: ${defaultKm.toLocaleString('es-CO')} km`}
-      folio="F-02B"
-      onClose={onClose}
-      actions={[
-        { label: 'Cancelar', variant: 'btn-ghost', onClick: onClose },
-        { label: 'Sellar registro', variant: 'btn-primary', onClick: handleSave },
-      ]}
-    >
-      <div className="form-group">
-        <label htmlFor={`${idPrefix}-km`}>
-          <span>Kilómetros al servicio</span>
-        </label>
-        <input
-          id={`${idPrefix}-km`}
-          type="number"
-          inputMode="numeric"
-          className="input"
-          value={recordKm}
-          onChange={(e) => setRecordKm(e.target.value)}
-          min={0}
-          max={999999}
-        />
-      </div>
-      <div className="form-group">
-        <label htmlFor={`${idPrefix}-notes`}>
-          <span>Notas del taller</span>
-          <span className="form-label-counter">
-            <b>{recordNotes.length}</b>/{MAX_NOTES_LENGTH}
-          </span>
-        </label>
-        <textarea
-          id={`${idPrefix}-notes`}
-          className="input"
-          value={recordNotes}
-          onChange={(e) => setRecordNotes(e.target.value)}
-          rows={3}
-          maxLength={MAX_NOTES_LENGTH}
-        />
-      </div>
-    </Modal>
-  );
-}
-
-function ServiceDetailModal({ service, onClose }: { service: ServicioCalculado; onClose: () => void }) {
-  const statusText = {
-    urgent: 'Vencido · requiere atención',
-    warning: 'Por vencer · atento',
-    ok: 'En orden',
-  }[service.status];
-
-  return (
-    <Modal
-      eyebrow={`Servicio · ${service.status === 'urgent' ? 'Crítico' : service.status === 'warning' ? 'Alerta' : 'Saludable'}`}
-      title={service.name}
-      subtitle={statusText}
-      folio="F-02C"
-      onClose={onClose}
-      actions={[
-        { label: 'Cerrar', variant: 'btn-secondary', onClick: onClose },
-      ]}
-    >
-      <div className="service-detail-info">
-        {service.kmRemaining !== null && (
-          <div className="detail-row">
-            <span className="label">Km restantes</span>
-            <span className="value">{service.kmRemaining.toLocaleString('es-CO')} km</span>
-          </div>
-        )}
-        {service.daysRemaining !== null && (
-          <div className="detail-row">
-            <span className="label">Días restantes</span>
-            <span className="value">{service.daysRemaining} d</span>
-          </div>
-        )}
-        {service.lastRecord && (
-          <div className="detail-row">
-            <span className="label">Último servicio</span>
-            <span className="value">
-              {service.lastRecord.km.toLocaleString('es-CO')} km ·{' '}
-              {new Date(service.lastRecord.date).toLocaleDateString('es-CO')}
-            </span>
-          </div>
-        )}
-      </div>
-    </Modal>
-  );
-}

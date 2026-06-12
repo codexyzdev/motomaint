@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import type { ServicioCalculado, Registro } from '@/lib/types';
 import ServiceCard from './ServiceCard';
 import HistoryItem from './HistoryItem';
@@ -14,7 +15,7 @@ interface ServiceTabsProps {
   onDeleteRecord: (id: string) => void;
 }
 
-export default function ServiceTabs({
+const ServiceTabs = memo(function ServiceTabs({
   activeTab,
   onTabChange,
   services,
@@ -96,4 +97,6 @@ export default function ServiceTabs({
       )}
     </div>
   );
-}
+});
+
+export default ServiceTabs;
