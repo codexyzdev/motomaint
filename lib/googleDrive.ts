@@ -43,7 +43,7 @@ async function fetchWithAuthRetry(url: string, options: RequestInit): Promise<Re
   return response;
 }
 
-async function findOrCreateFolder(): Promise<string> {
+export async function findOrCreateFolder(): Promise<string> {
   let headers = await getHeaders();
 
   let searchResponse = await fetch(
@@ -92,7 +92,7 @@ async function findOrCreateFolder(): Promise<string> {
   return folder.id;
 }
 
-async function findBackupFile(folderId: string): Promise<DriveFile | null> {
+export async function findBackupFile(folderId: string): Promise<DriveFile | null> {
   let headers = await getHeaders();
 
   let response = await fetch(
@@ -170,59 +170,40 @@ export async function uploadBackup(data: BackupPayload): Promise<{ success: bool
         parents: [folderId],
       };
 
+      const form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+      form.append('file', new Blob([jsonData], { type: MIME_TYPE }));
+
       let response = await fetch(
         `${DRIVE_UPLOAD_API}/files?uploadType=multipart`,
         {
           method: 'POST',
           headers: {
-            ...headers,
-            'Content-Type': 'multipart/related; boundary=boundary',
+            'Authorization': `Bearer ${(await getValidAccessToken())}`,
           },
-          body: [
-            '--boundary',
-            'Content-Type: application/json',
-            '',
-            JSON.stringify(metadata),
-            '',
-            '--boundary',
-            `Content-Type: ${MIME_TYPE}`,
-            '',
-            jsonData,
-            '--boundary--',
-          ].join('\r\n'),
+          body: form,
         }
       );
 
       if (response.status === 401) {
         const newToken = await getValidAccessTokenWithRefresh();
         if (newToken) {
-          headers = { ...headers, 'Authorization': `Bearer ${newToken}` };
           response = await fetch(
             `${DRIVE_UPLOAD_API}/files?uploadType=multipart`,
             {
               method: 'POST',
               headers: {
-                ...headers,
-                'Content-Type': 'multipart/related; boundary=boundary',
+                'Authorization': `Bearer ${newToken}`,
               },
-              body: [
-                '--boundary',
-                'Content-Type: application/json',
-                '',
-                JSON.stringify(metadata),
-                '',
-                '--boundary',
-                `Content-Type: ${MIME_TYPE}`,
-                '',
-                jsonData,
-                '--boundary--',
-              ].join('\r\n'),
+              body: form,
             }
           );
         }
       }
 
       if (!response.ok) {
+        const text = await response.text();
+        console.error('Failed to create backup file:', text);
         throw new Error('Failed to create backup file');
       }
 

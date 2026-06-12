@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import { getAuthState, getValidAccessToken } from './googleAuth';
-import { uploadBackup, downloadBackup } from './googleDrive';
+import { useEffect, useRef, useCallback, useState } from 'react';
+import { getAuthState, getValidAccessToken, getValidAccessTokenWithRefresh } from './googleAuth';
+import { uploadBackup, downloadBackup, findBackupFile, findOrCreateFolder } from './googleDrive';
 import { data } from './data';
 import type { BackupPayload } from './types';
 
@@ -10,63 +10,148 @@ interface AutoSyncOptions {
   onSyncStart?: () => void;
   onSyncEnd?: (success: boolean) => void;
   onRestore?: (data: BackupPayload) => void;
+  onSyncError?: (error: Error) => void;
 }
 
 export function useAutoSync(options: AutoSyncOptions = {}) {
+  const { onSyncStart, onSyncEnd, onRestore, onSyncError } = options;
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
   const syncedRef = useRef(false);
-  const { onSyncStart, onSyncEnd, onRestore } = options;
+  const isDirtyRef = useRef(false);
+  const currentStateRef = useRef<string>('');
+
+  const syncToDrive = useCallback(async () => {
+    const state = getAuthState();
+    if (!state.isAuthenticated) return false;
+
+    try {
+      const token = await getValidAccessTokenWithRefresh();
+      if (!token) return false;
+
+      const payload = await data.exportAll();
+      const result = await uploadBackup(payload);
+
+      if (result.success) {
+        isDirtyRef.current = false;
+        currentStateRef.current = JSON.stringify(payload);
+        setLastSyncTime(new Date().toLocaleTimeString());
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('syncToDrive error:', error);
+      if (error instanceof Error && error.message === 'AUTH_EXPIRED') {
+        onSyncError?.(error);
+      }
+      return false;
+    }
+  }, [onSyncError]);
+
+  const syncFromDrive = useCallback(async () => {
+    const state = getAuthState();
+    if (!state.isAuthenticated) return false;
+
+    try {
+      const token = await getValidAccessToken();
+      if (!token) return false;
+
+      const folderId = await findOrCreateFolder();
+      const file = await findBackupFile(folderId);
+
+      if (!file) {
+        console.log('No backup file found in Drive');
+        return false;
+      }
+
+      const driveData = await downloadBackup();
+      if (!driveData) return false;
+
+      const localData = await data.exportAll();
+
+      if (new Date(driveData.exportedAt) > new Date(localData.exportedAt)) {
+        onRestore?.(driveData);
+        currentStateRef.current = JSON.stringify(driveData);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('syncFromDrive error:', error);
+      if (error instanceof Error && error.message === 'AUTH_EXPIRED') {
+        onSyncError?.(error);
+      }
+      return false;
+    }
+  }, [onRestore, onSyncError]);
 
   useEffect(() => {
-    const syncOnOpen = async () => {
+    const initSync = async () => {
       const state = getAuthState();
       if (!state.isAuthenticated) return;
 
       syncedRef.current = true;
+      setIsSyncing(true);
       onSyncStart?.();
 
       try {
-        const token = await getValidAccessToken();
-        if (!token) return;
-
         const localData = await data.exportAll();
-        const driveData = await downloadBackup();
+        currentStateRef.current = JSON.stringify(localData);
 
-        if (!driveData) return;
-
-        if (new Date(driveData.exportedAt) > new Date(localData.exportedAt)) {
-          onRestore?.(driveData);
-        }
+        await syncFromDrive();
       } catch (error) {
-        console.error('Auto sync on open failed:', error);
+        console.error('Initial sync failed:', error);
       } finally {
+        setIsSyncing(false);
         onSyncEnd?.(true);
       }
     };
 
-    syncOnOpen();
-  }, [onSyncStart, onSyncEnd, onRestore]);
+    initSync();
+  }, [onSyncStart, onSyncEnd, syncFromDrive]);
 
   useEffect(() => {
-    const syncOnClose = async () => {
-      const state = getAuthState();
-      if (!state.isAuthenticated || !syncedRef.current) return;
+    const interval = setInterval(async () => {
+      if (!isDirtyRef.current) return;
+      setIsSyncing(true);
+      const success = await syncToDrive();
+      setIsSyncing(false);
+      onSyncEnd?.(success);
+    }, 10000);
 
-      try {
-        const token = await getValidAccessToken();
-        if (!token) return;
+    return () => clearInterval(interval);
+  }, [syncToDrive, onSyncEnd]);
 
-        const payload = await data.exportAll();
-        await uploadBackup(payload);
-      } catch (error) {
-        console.error('Auto sync on close failed:', error);
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden' && isDirtyRef.current) {
+        syncToDrive();
       }
     };
 
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      syncOnClose();
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => window.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [syncToDrive]);
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (isDirtyRef.current) {
+        syncToDrive();
+      }
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [syncToDrive]);
+
+  const markDirty = useCallback(() => {
+    isDirtyRef.current = true;
   }, []);
+
+  return {
+    isSyncing,
+    lastSyncTime,
+    syncToDrive,
+    syncFromDrive,
+    markDirty,
+  };
 }

@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from 'next';
 import { Poppins } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
-import Script from 'next/script';
 import './globals.css';
 import { ToastProvider } from '@/components/ui/useToast';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { SyncProvider } from '@/components/SyncProvider';
+import { Providers } from './providers';
 
 const poppins = Poppins({
   variable: '--font-poppins',
@@ -93,23 +93,21 @@ export default function RootLayout({
       className={`${poppins.variable} antialiased`}
       suppressHydrationWarning
     >
-      <body>
+<body>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <ErrorBoundary>
-          <ThemeProvider attribute="data-theme" defaultTheme="dark" enableSystem>
-            <ToastProvider>
-              <SyncProvider />
-              {children}
-            </ToastProvider>
-          </ThemeProvider>
-        </ErrorBoundary>
-        <Script
-          src="https://accounts.google.com/gsi/client"
-          strategy="lazyOnload"
-        />
+        <Providers>
+          <ErrorBoundary>
+            <ThemeProvider attribute="data-theme" defaultTheme="dark" enableSystem>
+              <ToastProvider>
+                <SyncProvider />
+                {children}
+              </ToastProvider>
+            </ThemeProvider>
+          </ErrorBoundary>
+        </Providers>
       </body>
     </html>
   );
