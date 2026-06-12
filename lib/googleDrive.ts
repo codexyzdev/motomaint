@@ -1,4 +1,4 @@
-import { getValidAccessToken, getValidAccessTokenWithRefresh, clearTokens } from './googleAuth';
+import { getValidAccessToken, getValidAccessTokenWithRefresh, clearAccessToken } from './googleAuth';
 import type { BackupPayload } from './types';
 
 const DRIVE_API = 'https://www.googleapis.com/drive/v3';
@@ -213,7 +213,7 @@ export async function uploadBackup(data: BackupPayload): Promise<{ success: bool
   } catch (error) {
     console.error('Upload error:', error);
     if (error instanceof Error && error.message === 'Not authenticated') {
-      clearTokens();
+      clearAccessToken();
     }
     throw error;
   }
@@ -255,7 +255,7 @@ export async function downloadBackup(): Promise<BackupPayload | null> {
   } catch (error) {
     console.error('Download error:', error);
     if (error instanceof Error && error.message === 'Not authenticated') {
-      clearTokens();
+      clearAccessToken();
     }
     throw error;
   }

@@ -18,42 +18,40 @@ There is **no typecheck script** — `next build` (or your editor's TS server) i
 ## Architecture
 
 - `app/` — Next.js App Router. Routes: `/` (splash gate → onboarding/dashboard), `/settings`. `app/layout.tsx` wires `Providers` → `ErrorBoundary` → `ThemeProvider` → `ToastProvider` → `SyncProvider`.
-- `components/` — grouped by feature: `dashboard/`, `onboarding/`, `settings/`, `ui/`. Top-level `SyncProvider.tsx`, `DriveSyncBootstrap.tsx`, `GoogleLoginButton.tsx`, `SyncStatus.tsx` are app-wide wiring.
+- `components/` — grouped by feature: `dashboard/`, `onboarding/`, `settings/`, `ui/`. Top-level `GoogleLoginButton.tsx`, `SyncProvider.tsx`, `SyncStatus.tsx` are app-wide wiring.
 - `lib/` — domain code. **Read these before touching anything else:**
   - `data.ts` — single API surface (`data.getMoto`, `data.saveMoto`, `data.addRecord`, `data.exportAll`, …). Everything else in the app should go through `data.*`; don't reach into `storage` directly.
   - `storage.ts` — localStorage adapter. All keys are prefixed with `motomaint:`. Replace this file to change the backend.
   - `engine.ts` — **pure** functions (`computeServicesStatus`, `formatServiceStatus`, `getMainProgress`). No React, no localStorage. Safe to unit-test in isolation.
   - `types.ts` — `Moto`, `TipoServicio`, `Registro`, `Ajustes`, `BackupPayload` (versioned, current `version: 1`).
   - `dataEvents.ts` — pub-sub: `emitDataChanged()` / `onDataChanged(cb)`. Every write in `data.ts` emits; components subscribe to refresh. Use this instead of prop-drilling refresh signals.
-- `auth.ts` (root) — NextAuth v5 config with the Google provider, `drive.file` scope, and a custom JWT callback that handles token refresh.
-- `app/api/auth/[...nextauth]/route.ts` — re-exports the NextAuth handlers.
-- `app/api/auth/callback/route.ts` — **looks like dead code** (POST handler, not wired to any client). Don't add to it without verifying the caller; check git history first.
+  - `authEvents.ts` — pub-sub for auth state: `notifyAuthChange(bool)` / `subscribeAuthChange(cb)`.
+  - `useAuthStatus.ts` — React 19 hook (`useSyncExternalStore`) that returns `{ isAuthenticated, hasValidToken }` reactively. Use this in any client component that needs to react to login/logout.
+  - `googleAuth.ts` — Google OAuth token storage (implicit flow, localStorage). `saveAccessToken`, `loadAccessToken`, `clearAccessToken`, `getAuthState`, `getValidAccessToken`. No server-side exchange; tokens are received directly from Google via the implicit flow.
+  - `googleDrive.ts` — Google Drive API client (`uploadBackup`, `downloadBackup`, `findOrCreateFolder`, `findBackupFile`, `getLastBackupInfo`). Reads token from `googleAuth.ts`. All calls are client-side; no backend.
+  - `globalSync.ts` — auto-sync orchestrator. `initAutoSync()` mounts a `onDataChanged` listener that pushes to Drive after a 3s debounce, and a `subscribeAuthChange` listener that pulls from Drive on login if the cloud backup is newer than local. Mounted once by `components/SyncProvider.tsx`.
+- `app/providers.tsx` — `GoogleOAuthProvider` from `@react-oauth/google`. **No** NextAuth, **no** SessionProvider, **no** server-side auth.
 
-## Storage
+## Auth & Google Drive
 
-- **localStorage**, not IndexedDB — the README is stale. The schema is versioned JSON blobs keyed under `moto`, `serviceTypes`, `history`, `settings` (see `KEYS` in `lib/data.ts`).
-- Default service catalog lives in `DEFAULT_SERVICES` in `lib/data.ts`. New users get it auto-seeded on first `getServices()` call.
+**Single stack**: `@react-oauth/google` (implicit OAuth flow). There is no server-side auth — no `next-auth`, no `app/api/auth/*`, no `client_secret` in `.env`.
 
-## Auth & Drive sync
-
-Two parallel stacks coexist and are easy to confuse:
-
-1. **NextAuth v5** (`auth.ts` at root) — used for the Google login button flow and exposes `session.accessToken` via `useSession()`. The `DriveSyncBootstrap` component consumes this token to download/upload the backup file on login.
-2. **`@react-oauth/google`** client provider — set up in `app/providers.tsx`. Provides the `useGoogleLogin` hook used by `components/GoogleLoginButton.tsx`.
-
-Correspondingly there are two Drive implementations:
-- `lib/drive.ts` — uses NextAuth session access token (the one currently wired in via `DriveSyncBootstrap`).
-- `lib/googleDrive.ts` + `lib/googleAuth.ts` — uses `@react-oauth/google` tokens in localStorage; appears to be the older path and is still referenced by some components.
-
-Backup file: `motomaint-backup.json` in a Drive folder named `MotoMaint`. Backup payload schema is `BackupPayload` in `lib/types.ts` (`version: 1` — bump and migrate if changing shape).
+- `components/GoogleLoginButton.tsx` uses `useGoogleLogin({ scope: 'drive.file' })` to get an `access_token` directly from Google, saves it to `localStorage` via `googleAuth.ts`, and notifies `authEvents`.
+- `components/SyncProvider.tsx` (in `app/layout.tsx`) kicks off `initAutoSync()`, which:
+  - **On data change** (`onDataChanged`): debounces 3s, then calls `googleDrive.uploadBackup()`.
+  - **On auth change** (`subscribeAuthChange(true)`): calls `googleDrive.downloadBackup()` and, if the cloud `exportedAt` is newer than local, calls `data.importAll()` + `emitDataChanged()` to restore.
+  - **On tab hidden / beforeunload**: force-sync any pending changes.
+- The `access_token` lives ~1h. When it expires, the next Drive call gets a 401, `googleDrive.ts` clears the token via `clearAccessToken()`, and the user is prompted to re-login from settings.
+- Backup file: `motomaint-backup.json` in a Drive folder named `MotoMaint`. Backup payload schema is `BackupPayload` in `lib/types.ts` (`version: 1` — bump and migrate if changing shape).
 
 ## Environment
 
-`.env` is gitignored *and* currently tracked locally with real secrets — **do not commit changes to it, and don't paste it anywhere**. Required vars:
+`.env` is gitignored *and* currently tracked locally with real secrets — **do not commit changes to it, and don't paste it anywhere**. The only required var is `NEXT_PUBLIC_GOOGLE_CLIENT_ID`. The legacy `AUTH_*`, `GOOGLE_CLIENT_SECRET`, and `NEXT_PUBLIC_GOOGLE_REDIRECT_URI` vars in `.env` are no longer used and can be removed (but again, don't commit the change).
 
-- `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
-- `NEXT_PUBLIC_GOOGLE_REDIRECT_URI=http://localhost:1234` (must match the dev port)
-- `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `AUTH_SECRET`, `AUTH_TRUST_HOST=true`
+## Storage
+
+- **localStorage**, not IndexedDB — the README is stale. The schema is versioned JSON blobs keyed under `moto`, `serviceTypes`, `history`, `settings` (see `KEYS` in `lib/data.ts`). The Google access token is keyed under `motomaint:google_access_token` in `lib/googleAuth.ts`.
+- Default service catalog lives in `DEFAULT_SERVICES` in `lib/data.ts`. New users get it auto-seeded on first `getServices()` call.
 
 ## Style and conventions
 
@@ -63,6 +61,7 @@ Backup file: `motomaint-backup.json` in a Drive folder named `MotoMaint`. Backup
 - **Tailwind v4** via `@tailwindcss/postcss` (no `tailwind.config.js` — config lives in `app/globals.css`).
 - UI strings and metadata are **Spanish (es-CO)** by default (`lang="es"`, OpenGraph `locale: 'es_CO'`). Keep new copy consistent.
 - No comments in code unless asked.
+- For React state that mirrors an external source (localStorage, custom pub-sub), prefer `useSyncExternalStore` over `useState` + `useEffect` — the React 19 eslint rule `react-hooks/set-state-in-effect` will reject the latter.
 
 ## Testing
 
@@ -77,9 +76,10 @@ Backup file: `motomaint-backup.json` in a Drive folder named `MotoMaint`. Backup
 - **Vercel deploy:** `vercel.json` pins `pnpm install` / `pnpm build`. Don't switch package managers without updating it.
 - **Skills:** `.agents/skills/` and `.kiro/skills/` contain installed skill packs (Next.js, React, accessibility, etc.). Load them via the `skill` tool when relevant rather than re-deriving the conventions.
 - **PWA:** `app/manifest.ts` is the source of truth (icons, theme color `#0c1118`). `public/` holds the actual icon assets.
+- **Pre-existing lint errors:** there are React 19 `react-hooks/set-state-in-effect` and `react-hooks/refs` violations in `components/dashboard/DashboardView.tsx`, `components/dashboard/MotoCard.tsx`, `components/settings/SettingsView.tsx`, and `app/page.tsx`. These predate the Google auth refactor — don't try to "fix" them as part of unrelated work, and don't add new instances of the pattern.
 
 ## Reference docs
 
-- `SPEC.md` — current spec for the Google Drive cloud sync feature (data model, sync flow, env vars). Trust this over `README.md` for sync-related decisions.
-- `README.md` — user-facing; **stale** in places (storage type, dev port). Don't use it as a source of truth for setup details.
+- `README.md` — user-facing; **stale** in places (storage type, dev port, mentions IndexedDB). Don't use it as a source of truth for setup details.
 - `components.json` — shadcn config; read before adding primitives.
+- [@react-oauth/google docs](https://github.com/MomenSherif/react-oauth/tree/master/packages/@react-oauth/google) — the auth library this app uses. `useGoogleLogin` returns an `access_token` directly (implicit flow); `GoogleLogin` is the prebuilt button that returns an `id_token` (NOT useful for Drive API calls).

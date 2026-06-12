@@ -1,42 +1,31 @@
 'use client';
 
-import { useSession, signIn } from "next-auth/react";
-import { useEffect, useState } from 'react';
+import { useGoogleLogin } from '@react-oauth/google';
+import { useAuthStatus } from '@/lib/useAuthStatus';
+import { saveAccessToken } from '@/lib/googleAuth';
 
 interface GoogleLoginButtonProps {
   onAuthenticated?: () => void;
 }
 
 export function GoogleLoginButton({ onAuthenticated }: GoogleLoginButtonProps) {
-  const { data: session, status } = useSession();
-  const [isReady, setIsReady] = useState(false);
+  const { isAuthenticated } = useAuthStatus();
 
-  useEffect(() => {
-    if (status !== 'loading') {
-      setIsReady(true);
-    }
-  }, [status]);
-
-  useEffect(() => {
-    if (status === 'authenticated') {
+  const login = useGoogleLogin({
+    onSuccess: (tokenResponse) => {
+      saveAccessToken({
+        access_token: tokenResponse.access_token,
+        expires_in: tokenResponse.expires_in,
+      });
       onAuthenticated?.();
-    }
-  }, [status, onAuthenticated]);
+    },
+    onError: (error) => {
+      console.error('Google login failed:', error);
+    },
+    scope: 'https://www.googleapis.com/auth/drive.file',
+  });
 
-  const handleLogin = () => {
-    signIn("google");
-  };
-
-  if (!isReady) {
-    return (
-      <button className="btn btn-secondary" disabled>
-        <span className="loading-spinner" aria-hidden="true" />
-        Conectando...
-      </button>
-    );
-  }
-
-  if (status === 'authenticated') {
+  if (isAuthenticated) {
     return (
       <div className="sync-connected">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2">
@@ -50,7 +39,7 @@ export function GoogleLoginButton({ onAuthenticated }: GoogleLoginButtonProps) {
   return (
     <button
       className="btn btn-secondary google-btn"
-      onClick={handleLogin}
+      onClick={() => login()}
       type="button"
     >
       <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">

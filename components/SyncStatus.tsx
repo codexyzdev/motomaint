@@ -1,21 +1,22 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useSession, signOut } from 'next-auth/react';
+import { googleLogout } from '@react-oauth/google';
 import { useRouter } from 'next/navigation';
 import { data } from '@/lib/data';
+import { clearAccessToken } from '@/lib/googleAuth';
+import { useAuthStatus } from '@/lib/useAuthStatus';
 import { useToast } from '@/components/ui/useToast';
 
 export function SyncStatus() {
-  const { status } = useSession();
+  const { isAuthenticated } = useAuthStatus();
   const router = useRouter();
   const { showToast } = useToast();
 
-  const isAuthenticated = status === 'authenticated';
-
   const handleDisconnect = useCallback(async () => {
+    googleLogout();
+    clearAccessToken();
     await data.reset();
-    await signOut({ redirect: false });
     showToast('Desconectado de Google', 'default');
     router.push('/');
   }, [showToast, router]);

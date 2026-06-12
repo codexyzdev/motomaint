@@ -1,52 +1,63 @@
-import { getAuthState, getValidAccessToken } from './googleAuth';
-import { uploadBackup } from './googleDrive';
+import { getAuthState, getValidAccessToken, subscribeAuthChange } from './googleAuth';
+import { uploadBackup, downloadBackup } from './googleDrive';
 import { data } from './data';
-import { onDataChanged } from './dataEvents';
-import { emitSyncCompleted } from './syncEvents';
+import { onDataChanged, emitDataChanged } from './dataEvents';
 
 const SYNC_DELAY = 3000;
 let syncTimeout: ReturnType<typeof setTimeout> | null = null;
+let initialized = false;
 
 function scheduleSync() {
-  if (syncTimeout) {
-    clearTimeout(syncTimeout);
-  }
-  syncTimeout = setTimeout(() => {
-    performSync();
-  }, SYNC_DELAY);
+  if (syncTimeout) clearTimeout(syncTimeout);
+  syncTimeout = setTimeout(performSync, SYNC_DELAY);
 }
 
 async function performSync() {
   try {
-    const state = getAuthState();
-    if (!state.isAuthenticated) return;
-
     const token = await getValidAccessToken();
     if (!token) return;
 
     const payload = await data.exportAll();
     const result = await uploadBackup(payload);
-    if (result.success) {
-      console.log('[AutoSync] Backup uploaded successfully');
-      emitSyncCompleted({ success: true, modifiedTime: result.modifiedTime });
-    } else {
-      emitSyncCompleted({ success: false, error: 'Upload failed' });
+    if (!result.success) {
+      console.warn('[AutoSync] Backup upload failed');
     }
   } catch (error) {
-    console.error('[AutoSync] Failed:', error);
-    emitSyncCompleted({ success: false, error: String(error) });
+    console.error('[AutoSync] push failed:', error);
   }
 }
 
-let initialized = false;
+async function pullFromDriveIfNewer() {
+  try {
+    const token = await getValidAccessToken();
+    if (!token) return;
+
+    const cloud = await downloadBackup();
+    if (!cloud) return;
+
+    const local = await data.exportAll();
+    if (new Date(cloud.exportedAt) > new Date(local.exportedAt)) {
+      await data.importAll(cloud);
+      emitDataChanged();
+    }
+  } catch (error) {
+    console.error('[AutoSync] pull from drive failed:', error);
+  }
+}
 
 export function initAutoSync() {
   if (initialized) return;
   initialized = true;
 
-  onDataChanged(() => {
-    scheduleSync();
+  onDataChanged(scheduleSync);
+
+  subscribeAuthChange((authenticated) => {
+    if (authenticated) pullFromDriveIfNewer();
   });
+
+  if (getAuthState().isAuthenticated) {
+    pullFromDriveIfNewer();
+  }
 
   if (typeof document !== 'undefined') {
     document.addEventListener('visibilitychange', () => {
@@ -63,8 +74,6 @@ export function initAutoSync() {
       performSync();
     });
   }
-
-  console.log('[AutoSync] Initialized');
 }
 
 export function triggerSyncNow() {

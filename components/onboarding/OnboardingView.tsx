@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
-import { useSession } from 'next-auth/react';
 import { data } from '@/lib/data';
 import { useToast } from '@/components/ui/useToast';
 import { GoogleLoginButton } from '@/components/GoogleLoginButton';
+import { useAuthStatus } from '@/lib/useAuthStatus';
 
 interface OnboardingViewProps {
   onComplete: () => void;
@@ -16,12 +16,7 @@ export default function OnboardingView({ onComplete }: OnboardingViewProps) {
   const [modelo, setModelo] = useState('');
   const [kmActual, setKmActual] = useState('');
   const { showToast } = useToast();
-  const { status } = useSession();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    setIsAuthenticated(status === 'authenticated');
-  }, [status]);
+  const { isAuthenticated } = useAuthStatus();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -64,7 +59,7 @@ export default function OnboardingView({ onComplete }: OnboardingViewProps) {
           Conecta con Google Drive para hacer backup de tu cuaderno de inspección y acceder desde cualquier dispositivo.
         </p>
         <div className="onboarding-google-btn">
-          <GoogleLoginButton onAuthenticated={() => setIsAuthenticated(true)} />
+          <GoogleLoginButton />
         </div>
         {isAuthenticated && (
           <p className="onboarding-connected-text">✓ Google Drive conectado - tus datos se sincronizarán automáticamente</p>
