@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { findDataFile, downloadFile } from '@/lib/drive';
 import { data } from '@/lib/data';
-import { emitDataChanged } from '@/lib/dataEvents';
+import { emitDataChanged, onDataChanged } from '@/lib/dataEvents';
+import { useDrivePush } from '@/lib/useDrivePush';
 
 interface DriveSyncBootstrapProps {
   children: React.ReactNode;
@@ -17,6 +18,9 @@ export function DriveSyncBootstrap({ children }: DriveSyncBootstrapProps) {
 
   const isAuthenticated = status === 'authenticated';
   const accessToken = session?.accessToken as string | undefined;
+
+  // Enable push sync
+  const { markDirty } = useDrivePush();
 
   useEffect(() => {
     if (isAuthenticated && accessToken && !hasRestored && !isRestoring) {
@@ -50,6 +54,17 @@ export function DriveSyncBootstrap({ children }: DriveSyncBootstrapProps) {
       setHasRestored(false);
     }
   }, [isAuthenticated, accessToken, hasRestored, isRestoring]);
+
+  // Mark dirty when data changes (after initial restore)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const unsubscribe = onDataChanged(() => {
+      markDirty();
+    });
+
+    return unsubscribe;
+  }, [isAuthenticated, markDirty]);
 
   return <>{children}</>;
 }
