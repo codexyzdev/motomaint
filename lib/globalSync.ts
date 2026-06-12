@@ -1,11 +1,16 @@
 import { getAuthState, getValidAccessToken, subscribeAuthChange } from './googleAuth';
-import { uploadBackup, downloadBackup } from './googleDrive';
+import { uploadBackup, downloadBackup, clearAccessToken } from './googleDrive';
 import { data } from './data';
 import { onDataChanged, emitDataChanged } from './dataEvents';
 
 const SYNC_DELAY = 3000;
 let syncTimeout: ReturnType<typeof setTimeout> | null = null;
 let initialized = false;
+let lastSyncError: string | null = null;
+
+export function getLastSyncError(): string | null {
+  return lastSyncError;
+}
 
 function scheduleSync() {
   if (syncTimeout) clearTimeout(syncTimeout);
@@ -20,14 +25,30 @@ async function performSync() {
     const payload = await data.exportAll();
     const result = await uploadBackup(payload);
     if (!result.success) {
+      lastSyncError = 'No se pudo subir el backup';
       console.warn('[AutoSync] Backup upload failed');
     }
   } catch (error) {
+    lastSyncError = error instanceof Error ? error.message : 'Error de sincronización';
     console.error('[AutoSync] push failed:', error);
   }
 }
 
-async function pullFromDriveIfNewer() {
+let pullResolve: (() => void) | null = null;
+
+export async function waitForPullComplete(): Promise<void> {
+  if (!pullResolve) return Promise.resolve();
+  return new Promise((resolve) => {
+    const check = () => {
+      if (!pullResolve) resolve();
+      else setTimeout(check, 50);
+    };
+    check();
+  });
+}
+
+async function pullFromDriveIfNewer(): Promise<void> {
+  lastSyncError = null;
   try {
     const token = await getValidAccessToken();
     if (!token) return;
@@ -45,7 +66,13 @@ async function pullFromDriveIfNewer() {
       emitDataChanged();
     }
   } catch (error) {
+    lastSyncError = error instanceof Error ? error.message : 'Error al descargar backup';
+    if (error instanceof Error && error.message === 'Not authenticated') {
+      clearAccessToken();
+    }
     console.error('[AutoSync] pull from drive failed:', error);
+  } finally {
+    pullResolve = null;
   }
 }
 
@@ -56,7 +83,10 @@ export function initAutoSync() {
   onDataChanged(scheduleSync);
 
   subscribeAuthChange((authenticated) => {
-    if (authenticated) pullFromDriveIfNewer();
+    if (authenticated) {
+      pullResolve = null;
+      pullFromDriveIfNewer();
+    }
   });
 
   if (getAuthState().isAuthenticated) {

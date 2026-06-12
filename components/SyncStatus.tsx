@@ -1,17 +1,26 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { googleLogout } from '@react-oauth/google';
 import { useRouter } from 'next/navigation';
 import { data } from '@/lib/data';
 import { clearAccessToken } from '@/lib/googleAuth';
 import { useAuthStatus } from '@/lib/useAuthStatus';
+import { getLastSyncError } from '@/lib/globalSync';
 import { useToast } from '@/components/ui/useToast';
 
 export function SyncStatus() {
   const { isAuthenticated } = useAuthStatus();
   const router = useRouter();
   const { showToast } = useToast();
+  const [syncError, setSyncError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSyncError(getLastSyncError());
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleDisconnect = useCallback(async () => {
     googleLogout();
@@ -37,6 +46,10 @@ export function SyncStatus() {
       <p className="sync-connected-text">
         ✓ Google Drive conectado
       </p>
+
+      {syncError && (
+        <p className="text-red-500 text-xs mt-1 mb-2">{syncError}</p>
+      )}
 
       <button
         className="btn btn-ghost disconnect-btn"

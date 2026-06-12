@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { data } from '@/lib/data';
+import { getAuthState } from '@/lib/googleAuth';
 import { onDataChanged } from '@/lib/dataEvents';
 import OnboardingView from '@/components/onboarding/OnboardingView';
 import DashboardView from '@/components/dashboard/DashboardView';
@@ -16,6 +17,13 @@ export default function SplashGate() {
     let cancelled = false;
 
     async function init() {
+      const isLoggedIn = getAuthState().hasValidToken;
+
+      if (isLoggedIn) {
+        // Give auto-sync a chance to pull from Drive before deciding the view
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+      }
+
       const [moto] = await Promise.all([
         data.getMoto(),
         new Promise<void>((resolve) => setTimeout(resolve, 700)),
