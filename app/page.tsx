@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { data } from '@/lib/data';
+import { onDataChanged } from '@/lib/dataEvents';
 import OnboardingView from '@/components/onboarding/OnboardingView';
 import DashboardView from '@/components/dashboard/DashboardView';
 
@@ -30,6 +31,18 @@ export default function SplashGate() {
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  // Listen for data changes (e.g., after restoring from Drive)
+  useEffect(() => {
+    const unsubscribe = onDataChanged(async () => {
+      const moto = await data.getMoto();
+      if (moto) {
+        setView('dashboard');
+      }
+    });
+
+    return unsubscribe;
   }, []);
 
   if (view === null) {

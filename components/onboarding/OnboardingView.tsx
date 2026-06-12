@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useSession } from 'next-auth/react';
 import { data } from '@/lib/data';
 import { useToast } from '@/components/ui/useToast';
+import { GoogleLoginButton } from '@/components/GoogleLoginButton';
 
 interface OnboardingViewProps {
   onComplete: () => void;
@@ -14,6 +16,12 @@ export default function OnboardingView({ onComplete }: OnboardingViewProps) {
   const [modelo, setModelo] = useState('');
   const [kmActual, setKmActual] = useState('');
   const { showToast } = useToast();
+  const { status } = useSession();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    setIsAuthenticated(status === 'authenticated');
+  }, [status]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -51,10 +59,19 @@ export default function OnboardingView({ onComplete }: OnboardingViewProps) {
         <Image src="/logo.webp" alt="" width={72} height={72} />
       </div>
 
-      <p className="onboarding-lead">
-        Una Cuaderno de inspección para que cada cambio de aceite, calibración y revisión quede
-        sellado en su página.
-      </p>
+      <div className="onboarding-google-section">
+        <p className="onboarding-lead">
+          Conecta con Google Drive para hacer backup de tu cuaderno de inspección y acceder desde cualquier dispositivo.
+        </p>
+        <GoogleLoginButton onAuthenticated={() => setIsAuthenticated(true)} />
+        {isAuthenticated && (
+          <p className="onboarding-connected-text">✓ Google Drive conectado - tus datos se sincronizarán automáticamente</p>
+        )}
+      </div>
+
+      <div className="onboarding-divider">
+        <span>o continúa sin cuenta Google</span>
+      </div>
 
       <form onSubmit={handleSubmit} noValidate>
         <div className="rule-line rule-line--strong" style={{ marginTop: 8, marginBottom: 18 }}>
@@ -117,6 +134,41 @@ export default function OnboardingView({ onComplete }: OnboardingViewProps) {
           Comenzar Cuaderno <span aria-hidden="true">→</span>
         </button>
       </form>
+
+      <style jsx>{`
+        .onboarding-google-section {
+          margin-bottom: 16px;
+          padding: 16px;
+          background: var(--surface-raised);
+          border-radius: 12px;
+          text-align: center;
+        }
+        .onboarding-lead {
+          font-size: 14px;
+          color: var(--text-secondary);
+          margin-bottom: 12px;
+        }
+        .onboarding-connected-text {
+          margin-top: 8px;
+          font-size: 12px;
+          color: var(--success);
+        }
+        .onboarding-divider {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin: 20px 0;
+          color: var(--text-tertiary);
+          font-size: 12px;
+        }
+        .onboarding-divider::before,
+        .onboarding-divider::after {
+          content: '';
+          flex: 1;
+          height: 1px;
+          background: var(--border);
+        }
+      `}</style>
     </div>
   );
 }
