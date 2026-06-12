@@ -2,6 +2,21 @@ import { notifyAuthChange } from './authEvents';
 
 const TOKEN_STORAGE_KEY = 'motomaint:google_access_token';
 
+const UNAUTHENTICATED_STATE: GoogleAuthState = Object.freeze({
+  isAuthenticated: false,
+  hasValidToken: false,
+});
+const AUTHENTICATED_STATE: GoogleAuthState = Object.freeze({
+  isAuthenticated: true,
+  hasValidToken: true,
+});
+
+let cachedState: GoogleAuthState | null = null;
+
+function invalidateAuthState() {
+  cachedState = null;
+}
+
 export interface StoredAccessToken {
   access_token: string;
   expires_at: number;
@@ -18,6 +33,7 @@ export function saveAccessToken(token: { access_token: string; expires_in: numbe
     expires_at: Date.now() + token.expires_in * 1000,
   };
   localStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(stored));
+  invalidateAuthState();
   notifyAuthChange(true);
 }
 
@@ -35,6 +51,7 @@ export function loadAccessToken(): StoredAccessToken | null {
 
 export function clearAccessToken(): void {
   localStorage.removeItem(TOKEN_STORAGE_KEY);
+  invalidateAuthState();
   notifyAuthChange(false);
 }
 
@@ -43,19 +60,20 @@ export function isTokenValid(token: StoredAccessToken): boolean {
 }
 
 export function getAuthState(): GoogleAuthState {
+  if (cachedState !== null) return cachedState;
+
   const token = loadAccessToken();
-  if (!token) return { isAuthenticated: false, hasValidToken: false };
-  const valid = isTokenValid(token);
-  if (!valid) {
-    clearAccessToken();
-    return { isAuthenticated: false, hasValidToken: false };
+  if (!token || !isTokenValid(token)) {
+    if (token) clearAccessToken();
+    cachedState = UNAUTHENTICATED_STATE;
+  } else {
+    cachedState = AUTHENTICATED_STATE;
   }
-  return { isAuthenticated: true, hasValidToken: true };
+  return cachedState;
 }
 
 export async function getValidAccessToken(): Promise<string | null> {
-  const state = getAuthState();
-  return state.hasValidToken ? loadAccessToken()?.access_token ?? null : null;
+  return getAuthState().hasValidToken ? loadAccessToken()?.access_token ?? null : null;
 }
 
 export async function getValidAccessTokenWithRefresh(): Promise<string | null> {
