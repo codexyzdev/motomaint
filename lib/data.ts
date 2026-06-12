@@ -33,7 +33,7 @@ const DEFAULT_SERVICES: TipoServicio[] = [
 ];
 
 const DEFAULT_SETTINGS: Ajustes = {
-  currency: 'COP',
+  currency: 'USD',
   language: 'es',
   notifications: false,
 };

@@ -100,7 +100,7 @@ export default function RootLayout({
         />
         <Providers>
           <ErrorBoundary>
-            <ThemeProvider attribute="data-theme" defaultTheme="dark" enableSystem>
+            <ThemeProvider attribute="data-theme" enableSystem>
               <ToastProvider>
                 <SyncProvider />
                 {children}
