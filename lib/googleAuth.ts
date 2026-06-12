@@ -1,6 +1,7 @@
 import { notifyAuthChange } from './authEvents';
 
 const TOKEN_STORAGE_KEY = 'motomaint:google_access_token';
+const tokenStore = typeof window !== 'undefined' ? window.sessionStorage : null;
 
 const UNAUTHENTICATED_STATE: GoogleAuthState = Object.freeze({
   isAuthenticated: false,
@@ -28,18 +29,20 @@ export interface GoogleAuthState {
 }
 
 export function saveAccessToken(token: { access_token: string; expires_in: number }): void {
+  if (!tokenStore) return;
   const stored: StoredAccessToken = {
     access_token: token.access_token,
     expires_at: Date.now() + token.expires_in * 1000,
   };
-  localStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(stored));
+  tokenStore.setItem(TOKEN_STORAGE_KEY, JSON.stringify(stored));
   invalidateAuthState();
   notifyAuthChange(true);
 }
 
 export function loadAccessToken(): StoredAccessToken | null {
+  if (!tokenStore) return null;
   try {
-    const raw = localStorage.getItem(TOKEN_STORAGE_KEY);
+    const raw = tokenStore.getItem(TOKEN_STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as StoredAccessToken;
     if (!parsed.access_token || typeof parsed.expires_at !== 'number') return null;
@@ -50,7 +53,8 @@ export function loadAccessToken(): StoredAccessToken | null {
 }
 
 export function clearAccessToken(): void {
-  localStorage.removeItem(TOKEN_STORAGE_KEY);
+  if (!tokenStore) return;
+  tokenStore.removeItem(TOKEN_STORAGE_KEY);
   invalidateAuthState();
   notifyAuthChange(false);
 }

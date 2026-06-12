@@ -27,7 +27,7 @@ There is **no typecheck script** — `next build` (or your editor's TS server) i
   - `dataEvents.ts` — pub-sub: `emitDataChanged()` / `onDataChanged(cb)`. Every write in `data.ts` emits; components subscribe to refresh. Use this instead of prop-drilling refresh signals.
   - `authEvents.ts` — pub-sub for auth state: `notifyAuthChange(bool)` / `subscribeAuthChange(cb)`.
   - `useAuthStatus.ts` — React 19 hook (`useSyncExternalStore`) that returns `{ isAuthenticated, hasValidToken }` reactively. Use this in any client component that needs to react to login/logout.
-  - `googleAuth.ts` — Google OAuth token storage (implicit flow, localStorage). `saveAccessToken`, `loadAccessToken`, `clearAccessToken`, `getAuthState`, `getValidAccessToken`. No server-side exchange; tokens are received directly from Google via the implicit flow.
+  - `googleAuth.ts` — Google OAuth token storage (implicit flow, **sessionStorage**, not localStorage — see Auth & Google Drive). `saveAccessToken`, `loadAccessToken`, `clearAccessToken`, `getAuthState`, `getValidAccessToken`. No server-side exchange; tokens are received directly from Google via the implicit flow.
   - `googleDrive.ts` — Google Drive API client (`uploadBackup`, `downloadBackup`, `findOrCreateFolder`, `findBackupFile`, `getLastBackupInfo`). Reads token from `googleAuth.ts`. All calls are client-side; no backend.
   - `globalSync.ts` — auto-sync orchestrator. `initAutoSync()` mounts a `onDataChanged` listener that pushes to Drive after a 3s debounce, and a `subscribeAuthChange` listener that pulls from Drive on login if the cloud backup is newer than local. Mounted once by `components/SyncProvider.tsx`.
 - `app/providers.tsx` — `GoogleOAuthProvider` from `@react-oauth/google`. **No** NextAuth, **no** SessionProvider, **no** server-side auth.
@@ -42,6 +42,7 @@ There is **no typecheck script** — `next build` (or your editor's TS server) i
   - **On auth change** (`subscribeAuthChange(true)`): calls `googleDrive.downloadBackup()` and, if the cloud `exportedAt` is newer than local, calls `data.importAll()` + `emitDataChanged()` to restore.
   - **On tab hidden / beforeunload**: force-sync any pending changes.
 - The `access_token` lives ~1h. When it expires, the next Drive call gets a 401, `googleDrive.ts` clears the token via `clearAccessToken()`, and the user is prompted to re-login from settings.
+- **Token storage is `sessionStorage`, not `localStorage`** — the token is wiped when the tab/PWA closes, so a stolen localStorage file or a malicious script that runs after the session is gone won't find it. Trade-off: the user has to re-login each time they reopen the app.
 - Backup file: `motomaint-backup.json` in a Drive folder named `MotoMaint`. Backup payload schema is `BackupPayload` in `lib/types.ts` (`version: 1` — bump and migrate if changing shape).
 
 ## Environment
@@ -50,7 +51,7 @@ There is **no typecheck script** — `next build` (or your editor's TS server) i
 
 ## Storage
 
-- **localStorage**, not IndexedDB — the README is stale. The schema is versioned JSON blobs keyed under `moto`, `serviceTypes`, `history`, `settings` (see `KEYS` in `lib/data.ts`). The Google access token is keyed under `motomaint:google_access_token` in `lib/googleAuth.ts`.
+- **localStorage**, not IndexedDB — the README is stale. The schema is versioned JSON blobs keyed under `moto`, `serviceTypes`, `history`, `settings` (see `KEYS` in `lib/data.ts`). The Google access token is keyed under `motomaint:google_access_token` in `lib/googleAuth.ts` (see Auth & Google Drive for why this is in sessionStorage).
 - Default service catalog lives in `DEFAULT_SERVICES` in `lib/data.ts`. New users get it auto-seeded on first `getServices()` call.
 
 ## Style and conventions

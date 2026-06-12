@@ -36,7 +36,11 @@ async function pullFromDriveIfNewer() {
     if (!cloud) return;
 
     const local = await data.exportAll();
-    if (new Date(cloud.exportedAt) > new Date(local.exportedAt)) {
+    const localIsEmpty = local.moto === null;
+    const cloudHasData = cloud.moto !== null;
+    const cloudIsNewer = new Date(cloud.exportedAt) > new Date(local.exportedAt);
+
+    if ((localIsEmpty && cloudHasData) || (!localIsEmpty && cloudIsNewer)) {
       await data.importAll(cloud);
       emitDataChanged();
     }
