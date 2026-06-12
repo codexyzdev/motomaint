@@ -56,14 +56,16 @@ export default function OnboardingView({ onComplete }: OnboardingViewProps) {
       </header>
 
       <div className="onboarding-illu" aria-hidden="true">
-        <Image src="/logo.webp" alt="" width={72} height={72} />
+        <Image src="/logo.webp" alt="" width={72} height={72} style={{ objectFit: 'contain' }} />
       </div>
 
-      <div className="onboarding-google-section">
-        <p className="onboarding-lead">
+      <div className="onboarding-google-section flex flex-col ">
+        <p className="onboarding-lead self-center ">
           Conecta con Google Drive para hacer backup de tu cuaderno de inspección y acceder desde cualquier dispositivo.
         </p>
-        <GoogleLoginButton onAuthenticated={() => setIsAuthenticated(true)} />
+        <div className="onboarding-google-btn">
+          <GoogleLoginButton onAuthenticated={() => setIsAuthenticated(true)} />
+        </div>
         {isAuthenticated && (
           <p className="onboarding-connected-text">✓ Google Drive conectado - tus datos se sincronizarán automáticamente</p>
         )}
@@ -138,15 +140,19 @@ export default function OnboardingView({ onComplete }: OnboardingViewProps) {
       <style jsx>{`
         .onboarding-google-section {
           margin-bottom: 16px;
-          padding: 16px;
           background: var(--surface-raised);
           border-radius: 12px;
           text-align: center;
+        }
+        .onboarding-google-btn {
+          display: flex;
+          justify-content: center;
         }
         .onboarding-lead {
           font-size: 14px;
           color: var(--text-secondary);
           margin-bottom: 12px;
+          line-height: 1.5;
         }
         .onboarding-connected-text {
           margin-top: 8px;
@@ -167,6 +173,12 @@ export default function OnboardingView({ onComplete }: OnboardingViewProps) {
           flex: 1;
           height: 1px;
           background: var(--border);
+        }
+        
+        @media (max-width: 380px) {
+          .onboarding-lead {
+            font-size: 13px;
+          }
         }
       `}</style>
     </div>
