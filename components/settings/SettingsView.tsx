@@ -13,6 +13,7 @@ import IconPicker from './IconPicker';
 import { ThemeToggle } from './ThemeToggle';
 import { GoogleLoginButton } from '@/components/GoogleLoginButton';
 import { SyncStatus } from '@/components/SyncStatus';
+import { triggerSyncNow } from '@/lib/globalSync';
 
 const DEFAULT_SERVICE_ICON = '🔧';
 
@@ -104,6 +105,7 @@ export default function SettingsView() {
     }
 
     await refresh();
+    triggerSyncNow();
   }
 
   async function handleToggleService() {
@@ -114,6 +116,7 @@ export default function SettingsView() {
       enabled: !currentModal.service.enabled,
     });
     await refresh();
+    triggerSyncNow();
     setModalState({ type: 'none' });
     showToast(
       currentModal.service.enabled ? 'Servicio desactivado' : 'Servicio activado',
@@ -127,6 +130,7 @@ export default function SettingsView() {
 
     await data.removeService(currentModal.service.id);
     await refresh();
+    triggerSyncNow();
     setModalState({ type: 'none' });
     showToast('Servicio eliminado', 'success');
   }
@@ -299,6 +303,7 @@ export default function SettingsView() {
           onClose={closeModal}
           onSaved={async () => {
             await refresh();
+            triggerSyncNow();
           }}
         />
       )}

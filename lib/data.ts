@@ -77,8 +77,9 @@ export const data = {
   async getServices(): Promise<TipoServicio[]> {
     const services = await storage.get<TipoServicio[]>(KEYS.SERVICES);
     if (!services || !Array.isArray(services) || services.length === 0) {
-      await storage.set<TipoServicio[]>(KEYS.SERVICES, DEFAULT_SERVICES);
-      return DEFAULT_SERVICES;
+      const defaults = JSON.parse(JSON.stringify(DEFAULT_SERVICES)) as TipoServicio[];
+      await storage.set<TipoServicio[]>(KEYS.SERVICES, defaults);
+      return defaults;
     }
     return services;
   },
